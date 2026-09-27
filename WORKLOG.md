@@ -96,3 +96,29 @@ Append-only log of what was done each session.
   (+14.5s, slow only due to 2-core emulator). No FATAL/crash in logcat.
   This validates prefs/Drift/notifications init on a real device.
 - Emulator killed after test; RAM back to ~2.7GB used.
+
+## 2026-09-27 — Global emulator station setup
+
+### Renames & tuning
+- `pd_test` renamed to **`pixel_7`** (device-based naming; AVD dir + ini + config).
+- All AVDs: 2 CPU cores, GPU host mode (`hw.gpu.enabled=yes, hw.gpu.mode=host`).
+
+### The shared pool (all verified booting, one at a time)
+| AVD | Profile | Android | RAM | Image | Use |
+|---|---|---|---|---|---|
+| `pixel_7` | Pixel 7 | 16 (API 36) | 1536M | google_apis x86_64 (existing) | Default tester |
+| `quick_phone` | Pixel 7 | 15 (API 35) | 1024M | aosp_atd x86_64 (pre-existing, $0 download) | Fast smoke tests |
+| `pixel_tablet` | Pixel Tablet | 16 (API 36) | 2048M | google_apis x86_64 (reused) | Layout checks (2560x1600 verified) |
+| `old_phone` | Pixel 7 | 11 (API 30) | 1536M | google_apis x86_64 (**downloaded ~1GB**) | Backward-compat |
+
+### GPU
+- Emulator renders on **NVIDIA MX330** (`gles_mode_selected:host` in log,
+  ~250MB VRAM used). Prime-offload env vars set in launcher.
+- PD app regression on GPU `pixel_7`: install OK, first frame displayed,
+  no crashes.
+
+### Launcher (`~/.local/bin`, on PATH, works from any project)
+- `emu-boot <avd>`: refuses if one already runs, 2GB memory gate, `setsid`
+  detach (survives tool timeouts), NVIDIA env, waits for boot_completed.
+- `emu-kill`: graceful kill + force fallback + RAM report.
+- House rule: one emulator at a time, killed after each test.
