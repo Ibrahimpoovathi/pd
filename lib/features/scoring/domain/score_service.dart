@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:pd/core/storage/database.dart';
 import 'package:pd/core/utils/date_helpers.dart';
+import 'package:pd/features/prayer/domain/prayer_models.dart';
 import 'package:pd/features/scoring/domain/score_constants.dart';
 
 /// Writes section scores into [DailyScores] and maintains the weighted
@@ -80,6 +81,79 @@ class ScoreService {
     await (_db.update(_db.dailyScores)..where((t) => t.id.equals(row.id)))
         .write(DailyScoresCompanion(todoScore: Value(value)));
     await recalcToday(today);
+  }
+
+  /// Recomputes the whole prayer section for [date] from its record.
+  /// Idempotent: call after every prayer/ibadah toggle. Jama'at and mosque
+  /// bonuses count only when the fard itself is marked.
+  Future<void> recordPrayerDay(DateTime date, {DateTime? now}) async {
+    final day = _day(date);
+    final today = _day(now ?? DateTime.now());
+    final record = await (_db.select(_db.prayerRecords)
+          ..where((t) => t.date.equals(day)))
+        .getSingleOrNull();
+
+    var points = 0;
+    if (record != null) {
+      for (final p in PrayerName.values) {
+        if (record.prayed(p)) {
+          points += ScorePoints.prayerOnTime;
+          if (record.mosque(p)) points += ScorePoints.prayerMosqueBonus;
+          if (record.jamaat(p)) points += ScorePoints.prayerJamaatBonus;
+        }
+      }
+      if (record.tahajjud) points += ScorePoints.tahajjud;
+      if (record.duha) points += ScorePoints.duha;
+      if (record.quranWaqiah) points += ScorePoints.quranWaqiah;
+      if (record.quranMulk) points += ScorePoints.quranMulk;
+      points += (record.quranOtherPages * ScorePoints.quranPage)
+          .clamp(0, ScorePoints.quranOtherCap);
+      if (record.adhkarMorning) points += ScorePoints.adhkarEach;
+      if (record.adhkarEvening) points += ScorePoints.adhkarEach;
+      points += _dhikrPoints(record.salatDone, record.salatCount);
+      points += _dhikrPoints(record.thahleelDone, record.thahleelCount);
+      points += _dhikrPoints(record.isthighfarDone, record.isthighfarCount);
+
+      final streak = await _prayerStreak(day);
+      points += (streak * ScorePoints.prayerStreakBonusPerDay)
+          .clamp(0, ScorePoints.prayerStreakBonusCap);
+    }
+
+    final row = await _getOrCreate(today);
+    // Prayer points belong to their own day; only today's row is live.
+    // (Past days keep history in prayer_records; section history rebuilds
+    // fully in Phase 7.)
+    if (isSameDay(day, today)) {
+      await (_db.update(_db.dailyScores)..where((t) => t.id.equals(row.id)))
+          .write(DailyScoresCompanion(
+              prayerScore: Value(points.clamp(0, ScoreSectionCaps.prayer))));
+      await recalcToday(today);
+    }
+  }
+
+  static int _dhikrPoints(bool done, int count) {
+    if (!done) return 0;
+    return (ScorePoints.dhikrDoneBase +
+            (count ~/ 10) * ScorePoints.dhikrPerTen)
+        .clamp(0, ScorePoints.dhikrCap);
+  }
+
+  /// Consecutive days strictly before [day] with all 5 fard marked.
+  Future<int> _prayerStreak(DateTime day) async {
+    final rows = await (_db.select(_db.prayerRecords)
+          ..where((t) => t.date.isSmallerThanValue(day))
+          ..orderBy([(t) => OrderingTerm.desc(t.date)])
+          ..limit(366))
+        .get();
+    var streak = 0;
+    var cursor = day.subtract(const Duration(days: 1));
+    for (final r in rows) {
+      if (!isSameDay(r.date, cursor)) break;
+      if (!(r.fajr && r.dhuhr && r.asr && r.maghrib && r.isha)) break;
+      streak++;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    return streak;
   }
 
   /// Recomputes [DailyScores.totalScore] (weighted 0-100) and

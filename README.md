@@ -14,7 +14,7 @@ notification infrastructure, and placeholder routes for upcoming modules.
 |---|---|---|
 | 1 | Foundation: scaffold, themes, DB schema, shell, docs | Done |
 | 2 | To-Do (tabs, reminders, trash, auto-clear) | Done |
-| 3 | Muslim tracker (prayer calc + override + reset, ibadah) | Planned |
+| 3 | Muslim tracker (prayer calc + override + reset, ibadah) | Done |
 | 4 | Water tracker (ring, smart reminders, history) | Planned |
 | 5 | Pomodoro (dim circle, hidden time, background, chime) | Planned |
 | 6 | Screen time (usage tracking, limits, focus mode) | Planned |
@@ -59,6 +59,22 @@ Overall daily score (0–100) =
 Pomodoro awards **Focus XP only on completed work sessions** — tracked
 separately, excluded from the overall score. See
 `lib/features/scoring/domain/score_constants.dart` for point values.
+
+## Install on your phone
+
+After every phase, a tested debug APK is staged in `releases/`:
+
+```
+releases/pd-latest-debug.apk          # always the newest build (grab this)
+releases/pd-phase2-todo-debug.apk     # Phase 2: To-Do module
+releases/pd-phase3-prayer-debug.apk   # Phase 3: Muslim tracker
+```
+
+1. Copy the APK to your phone (USB, file share, QR — any method).
+2. Open it on the phone and allow **"Install unknown apps"** once when asked.
+3. The app installs as **pd** with the dark monogram icon. Debug builds can
+   be installed alongside (and over) previous ones; your local data is kept
+   on upgrade, wiped on uninstall.
 
 ## Development
 

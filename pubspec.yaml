@@ -54,6 +54,7 @@ dependencies:
   fl_chart: ^1.2.0
   table_calendar: ^3.2.1
   flutter_foreground_task: ^11.0.3
+  geolocator: ^14.1.1
 
 dev_dependencies:
   flutter_test:

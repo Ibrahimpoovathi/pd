@@ -97,6 +97,10 @@ class PrayerSettings extends Table {
   BoolColumn get useManual => boolean().withDefault(const Constant(false))();
   BoolColumn get notificationsEnabled =>
       boolean().withDefault(const Constant(false))();
+  // Prayer-time location (null until the user sets it).
+  RealColumn get latitude => real().nullable()();
+  RealColumn get longitude => real().nullable()();
+  TextColumn get locationLabel => text().nullable()();
 }
 
 // ---------------------------------------------------------------------------
@@ -211,7 +215,18 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.addColumn(prayerSettings, prayerSettings.latitude);
+            await m.addColumn(prayerSettings, prayerSettings.longitude);
+            await m.addColumn(prayerSettings, prayerSettings.locationLabel);
+          }
+        },
+      );
 }
 
 LazyDatabase _openConnection() {

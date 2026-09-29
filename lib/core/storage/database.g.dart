@@ -2850,6 +2850,39 @@ class $PrayerSettingsTable extends PrayerSettings
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _latitudeMeta = const VerificationMeta(
+    'latitude',
+  );
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+    'latitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _longitudeMeta = const VerificationMeta(
+    'longitude',
+  );
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+    'longitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _locationLabelMeta = const VerificationMeta(
+    'locationLabel',
+  );
+  @override
+  late final GeneratedColumn<String> locationLabel = GeneratedColumn<String>(
+    'location_label',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2858,6 +2891,9 @@ class $PrayerSettingsTable extends PrayerSettings
     manualOffsetsJson,
     useManual,
     notificationsEnabled,
+    latitude,
+    longitude,
+    locationLabel,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2913,6 +2949,27 @@ class $PrayerSettingsTable extends PrayerSettings
         ),
       );
     }
+    if (data.containsKey('latitude')) {
+      context.handle(
+        _latitudeMeta,
+        latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta),
+      );
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(
+        _longitudeMeta,
+        longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
+      );
+    }
+    if (data.containsKey('location_label')) {
+      context.handle(
+        _locationLabelMeta,
+        locationLabel.isAcceptableOrUnknown(
+          data['location_label']!,
+          _locationLabelMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2946,6 +3003,18 @@ class $PrayerSettingsTable extends PrayerSettings
         DriftSqlType.bool,
         data['${effectivePrefix}notifications_enabled'],
       )!,
+      latitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}latitude'],
+      ),
+      longitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}longitude'],
+      ),
+      locationLabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location_label'],
+      ),
     );
   }
 
@@ -2962,6 +3031,9 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
   final String manualOffsetsJson;
   final bool useManual;
   final bool notificationsEnabled;
+  final double? latitude;
+  final double? longitude;
+  final String? locationLabel;
   const PrayerSetting({
     required this.id,
     required this.calculationMethod,
@@ -2969,6 +3041,9 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
     required this.manualOffsetsJson,
     required this.useManual,
     required this.notificationsEnabled,
+    this.latitude,
+    this.longitude,
+    this.locationLabel,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2979,6 +3054,15 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
     map['manual_offsets_json'] = Variable<String>(manualOffsetsJson);
     map['use_manual'] = Variable<bool>(useManual);
     map['notifications_enabled'] = Variable<bool>(notificationsEnabled);
+    if (!nullToAbsent || latitude != null) {
+      map['latitude'] = Variable<double>(latitude);
+    }
+    if (!nullToAbsent || longitude != null) {
+      map['longitude'] = Variable<double>(longitude);
+    }
+    if (!nullToAbsent || locationLabel != null) {
+      map['location_label'] = Variable<String>(locationLabel);
+    }
     return map;
   }
 
@@ -2990,6 +3074,15 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
       manualOffsetsJson: Value(manualOffsetsJson),
       useManual: Value(useManual),
       notificationsEnabled: Value(notificationsEnabled),
+      latitude: latitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latitude),
+      longitude: longitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longitude),
+      locationLabel: locationLabel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(locationLabel),
     );
   }
 
@@ -3007,6 +3100,9 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
       notificationsEnabled: serializer.fromJson<bool>(
         json['notificationsEnabled'],
       ),
+      latitude: serializer.fromJson<double?>(json['latitude']),
+      longitude: serializer.fromJson<double?>(json['longitude']),
+      locationLabel: serializer.fromJson<String?>(json['locationLabel']),
     );
   }
   @override
@@ -3019,6 +3115,9 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
       'manualOffsetsJson': serializer.toJson<String>(manualOffsetsJson),
       'useManual': serializer.toJson<bool>(useManual),
       'notificationsEnabled': serializer.toJson<bool>(notificationsEnabled),
+      'latitude': serializer.toJson<double?>(latitude),
+      'longitude': serializer.toJson<double?>(longitude),
+      'locationLabel': serializer.toJson<String?>(locationLabel),
     };
   }
 
@@ -3029,6 +3128,9 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
     String? manualOffsetsJson,
     bool? useManual,
     bool? notificationsEnabled,
+    Value<double?> latitude = const Value.absent(),
+    Value<double?> longitude = const Value.absent(),
+    Value<String?> locationLabel = const Value.absent(),
   }) => PrayerSetting(
     id: id ?? this.id,
     calculationMethod: calculationMethod ?? this.calculationMethod,
@@ -3036,6 +3138,11 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
     manualOffsetsJson: manualOffsetsJson ?? this.manualOffsetsJson,
     useManual: useManual ?? this.useManual,
     notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+    latitude: latitude.present ? latitude.value : this.latitude,
+    longitude: longitude.present ? longitude.value : this.longitude,
+    locationLabel: locationLabel.present
+        ? locationLabel.value
+        : this.locationLabel,
   );
   PrayerSetting copyWithCompanion(PrayerSettingsCompanion data) {
     return PrayerSetting(
@@ -3051,6 +3158,11 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
       notificationsEnabled: data.notificationsEnabled.present
           ? data.notificationsEnabled.value
           : this.notificationsEnabled,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      locationLabel: data.locationLabel.present
+          ? data.locationLabel.value
+          : this.locationLabel,
     );
   }
 
@@ -3062,7 +3174,10 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
           ..write('madhab: $madhab, ')
           ..write('manualOffsetsJson: $manualOffsetsJson, ')
           ..write('useManual: $useManual, ')
-          ..write('notificationsEnabled: $notificationsEnabled')
+          ..write('notificationsEnabled: $notificationsEnabled, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('locationLabel: $locationLabel')
           ..write(')'))
         .toString();
   }
@@ -3075,6 +3190,9 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
     manualOffsetsJson,
     useManual,
     notificationsEnabled,
+    latitude,
+    longitude,
+    locationLabel,
   );
   @override
   bool operator ==(Object other) =>
@@ -3085,7 +3203,10 @@ class PrayerSetting extends DataClass implements Insertable<PrayerSetting> {
           other.madhab == this.madhab &&
           other.manualOffsetsJson == this.manualOffsetsJson &&
           other.useManual == this.useManual &&
-          other.notificationsEnabled == this.notificationsEnabled);
+          other.notificationsEnabled == this.notificationsEnabled &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
+          other.locationLabel == this.locationLabel);
 }
 
 class PrayerSettingsCompanion extends UpdateCompanion<PrayerSetting> {
@@ -3095,6 +3216,9 @@ class PrayerSettingsCompanion extends UpdateCompanion<PrayerSetting> {
   final Value<String> manualOffsetsJson;
   final Value<bool> useManual;
   final Value<bool> notificationsEnabled;
+  final Value<double?> latitude;
+  final Value<double?> longitude;
+  final Value<String?> locationLabel;
   const PrayerSettingsCompanion({
     this.id = const Value.absent(),
     this.calculationMethod = const Value.absent(),
@@ -3102,6 +3226,9 @@ class PrayerSettingsCompanion extends UpdateCompanion<PrayerSetting> {
     this.manualOffsetsJson = const Value.absent(),
     this.useManual = const Value.absent(),
     this.notificationsEnabled = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.locationLabel = const Value.absent(),
   });
   PrayerSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -3110,6 +3237,9 @@ class PrayerSettingsCompanion extends UpdateCompanion<PrayerSetting> {
     this.manualOffsetsJson = const Value.absent(),
     this.useManual = const Value.absent(),
     this.notificationsEnabled = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.locationLabel = const Value.absent(),
   });
   static Insertable<PrayerSetting> custom({
     Expression<int>? id,
@@ -3118,6 +3248,9 @@ class PrayerSettingsCompanion extends UpdateCompanion<PrayerSetting> {
     Expression<String>? manualOffsetsJson,
     Expression<bool>? useManual,
     Expression<bool>? notificationsEnabled,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
+    Expression<String>? locationLabel,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3127,6 +3260,9 @@ class PrayerSettingsCompanion extends UpdateCompanion<PrayerSetting> {
       if (useManual != null) 'use_manual': useManual,
       if (notificationsEnabled != null)
         'notifications_enabled': notificationsEnabled,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (locationLabel != null) 'location_label': locationLabel,
     });
   }
 
@@ -3137,6 +3273,9 @@ class PrayerSettingsCompanion extends UpdateCompanion<PrayerSetting> {
     Value<String>? manualOffsetsJson,
     Value<bool>? useManual,
     Value<bool>? notificationsEnabled,
+    Value<double?>? latitude,
+    Value<double?>? longitude,
+    Value<String?>? locationLabel,
   }) {
     return PrayerSettingsCompanion(
       id: id ?? this.id,
@@ -3145,6 +3284,9 @@ class PrayerSettingsCompanion extends UpdateCompanion<PrayerSetting> {
       manualOffsetsJson: manualOffsetsJson ?? this.manualOffsetsJson,
       useManual: useManual ?? this.useManual,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      locationLabel: locationLabel ?? this.locationLabel,
     );
   }
 
@@ -3169,6 +3311,15 @@ class PrayerSettingsCompanion extends UpdateCompanion<PrayerSetting> {
     if (notificationsEnabled.present) {
       map['notifications_enabled'] = Variable<bool>(notificationsEnabled.value);
     }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
+    if (locationLabel.present) {
+      map['location_label'] = Variable<String>(locationLabel.value);
+    }
     return map;
   }
 
@@ -3180,7 +3331,10 @@ class PrayerSettingsCompanion extends UpdateCompanion<PrayerSetting> {
           ..write('madhab: $madhab, ')
           ..write('manualOffsetsJson: $manualOffsetsJson, ')
           ..write('useManual: $useManual, ')
-          ..write('notificationsEnabled: $notificationsEnabled')
+          ..write('notificationsEnabled: $notificationsEnabled, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('locationLabel: $locationLabel')
           ..write(')'))
         .toString();
   }
@@ -7446,6 +7600,9 @@ typedef $$PrayerSettingsTableCreateCompanionBuilder =
       Value<String> manualOffsetsJson,
       Value<bool> useManual,
       Value<bool> notificationsEnabled,
+      Value<double?> latitude,
+      Value<double?> longitude,
+      Value<String?> locationLabel,
     });
 typedef $$PrayerSettingsTableUpdateCompanionBuilder =
     PrayerSettingsCompanion Function({
@@ -7455,6 +7612,9 @@ typedef $$PrayerSettingsTableUpdateCompanionBuilder =
       Value<String> manualOffsetsJson,
       Value<bool> useManual,
       Value<bool> notificationsEnabled,
+      Value<double?> latitude,
+      Value<double?> longitude,
+      Value<String?> locationLabel,
     });
 
 class $$PrayerSettingsTableFilterComposer
@@ -7493,6 +7653,21 @@ class $$PrayerSettingsTableFilterComposer
 
   ColumnFilters<bool> get notificationsEnabled => $composableBuilder(
     column: $table.notificationsEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get locationLabel => $composableBuilder(
+    column: $table.locationLabel,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -7535,6 +7710,21 @@ class $$PrayerSettingsTableOrderingComposer
     column: $table.notificationsEnabled,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get locationLabel => $composableBuilder(
+    column: $table.locationLabel,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PrayerSettingsTableAnnotationComposer
@@ -7567,6 +7757,17 @@ class $$PrayerSettingsTableAnnotationComposer
 
   GeneratedColumn<bool> get notificationsEnabled => $composableBuilder(
     column: $table.notificationsEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumn<String> get locationLabel => $composableBuilder(
+    column: $table.locationLabel,
     builder: (column) => column,
   );
 }
@@ -7610,6 +7811,9 @@ class $$PrayerSettingsTableTableManager
                 Value<String> manualOffsetsJson = const Value.absent(),
                 Value<bool> useManual = const Value.absent(),
                 Value<bool> notificationsEnabled = const Value.absent(),
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
+                Value<String?> locationLabel = const Value.absent(),
               }) => PrayerSettingsCompanion(
                 id: id,
                 calculationMethod: calculationMethod,
@@ -7617,6 +7821,9 @@ class $$PrayerSettingsTableTableManager
                 manualOffsetsJson: manualOffsetsJson,
                 useManual: useManual,
                 notificationsEnabled: notificationsEnabled,
+                latitude: latitude,
+                longitude: longitude,
+                locationLabel: locationLabel,
               ),
           createCompanionCallback:
               ({
@@ -7626,6 +7833,9 @@ class $$PrayerSettingsTableTableManager
                 Value<String> manualOffsetsJson = const Value.absent(),
                 Value<bool> useManual = const Value.absent(),
                 Value<bool> notificationsEnabled = const Value.absent(),
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
+                Value<String?> locationLabel = const Value.absent(),
               }) => PrayerSettingsCompanion.insert(
                 id: id,
                 calculationMethod: calculationMethod,
@@ -7633,6 +7843,9 @@ class $$PrayerSettingsTableTableManager
                 manualOffsetsJson: manualOffsetsJson,
                 useManual: useManual,
                 notificationsEnabled: notificationsEnabled,
+                latitude: latitude,
+                longitude: longitude,
+                locationLabel: locationLabel,
               ),
           withReferenceMapper: (p0) => p0
               .map(

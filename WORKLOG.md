@@ -161,3 +161,62 @@ Append-only log of what was done each session.
 - Fixed real bugs found by tests: `ref.invalidate` in `deactivate` after
   unmount (removed — streams auto-update); `context.pop()` with no router
   in tests (routed test harness).
+
+## 2026-09-29 — App identity + per-phase APK staging (standing rule)
+
+### Icon
+- Name already `pd` on Android (`android:label`) and iOS (`CFBundleName`).
+- New monogram: lowercase "pd" (DejaVu Bold, `#58a6ff`) on `#0d1117` with a
+  green progress-ring accent. Source: `assets/icon/icon.png` (full-bleed) +
+  `icon_fg.png` (transparent adaptive foreground), generated with PIL.
+- `flutter_launcher_icons:0.9.3` is broken on Kotlin-DSL projects (crashes
+  reading `build.gradle` for minSdk; also uses wrong config key) — removed.
+  Android (`mipmap-*` + `anydpi-v26` adaptive XML + bg color) and iOS
+  (15-size set) icons generated manually instead.
+- Adaptive-fg lesson: content must fit the 66dp safe circle — first attempt
+  clipped under the circular mask (verified via drawer screenshot), fixed by
+  shrinking the fg block to 500px. Verified clean via second screenshot.
+
+### APK staging (standing rule from here on)
+- After each phase: rebuild → emulator install + launch check → copy APK to
+  `releases/pd-<phase>-<module>-debug.apk` → fresh reinstall FROM the staged
+  file + launch check → kill emulator → update docs.
+- Phase 2 staged: `releases/pd-phase2-todo-debug.apk` (208MB). Fresh install
+  from staged file: first frame 6.5s, no crashes. Phone install steps in README.
+
+## 2026-09-29 — Phase 3: Muslim tracker (done, verified)
+
+### Features (opt-in, OFF by default)
+- Prayers tab: 5 fard cards with calculated times + prayed checkbox;
+  jama'at/mosque chips appear when prayed (unmarking clears both).
+  Streak banner (resets on a miss), method/madhab/location summary line.
+  Works without location (times show --:--, marking still works).
+- Times: adhan lib, 11 methods (MWL default) + Shafi/Hanafi. Manual per-prayer
+  minute offsets behind a switch + "Reset to app default" (clears overrides,
+  keeps method/madhab/location). Offsets JSON parsed leniently.
+- Location: manual lat/lng + GPS detect (geolocator; manifest permissions
+  added). Prayer alerts (exact/inexact) re-scheduled at startup + on change.
+- Extra tab: Tahajjud/Duha, Waqiah+Mulk highlighted cards, other-pages
+  stepper, morning/evening adhkar, Salat/Thahleel/Istighfar checkbox +
+  optional count field (submitting a count auto-ticks the box).
+- Scoring: full recompute per day (idempotent) — fard 15, mosque +5, jamaat +3
+  (only with fard), tahajjud 25, duha 15, waqiah/mulk 20, pages 2 (cap 20),
+  adhkar 10, dhikr 5 + 2/10 (cap 20 each), streak +3/day (cap 30), cap 200.
+- Streak = consecutive full-fard days (derived from history — a miss yields 0,
+  no reset job needed).
+- Notification tap on prayer alert opens /prayer.
+
+### DB
+- v2 migration: prayer_settings += latitude/longitude/locationLabel.
+  Verified live on device (v1→v2 upgrade, no errors).
+
+### Verification
+- 16 tests pass (8 calc + 6 score/repo + 2 widget, files run separately).
+- `flutter analyze` clean. Device (`pixel_7`): install, first frame, clean log.
+- Staged `releases/pd-phase3-prayer-debug.apk` + `pd-latest-debug.apk`
+  (identical sha1 to the tested build).
+
+### Notes
+- `flutter pub add geolocation` (old unmaintained package) breaks resolution;
+  `geolocator` alone is correct.
+- DropdownButtonFormField `value:` is deprecated → `initialValue:`.

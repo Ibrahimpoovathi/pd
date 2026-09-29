@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pd/app/placeholder_screen.dart';
 import 'package:pd/features/home/presentation/screens/home_screen.dart';
+import 'package:pd/features/prayer/presentation/screens/prayer_dashboard_screen.dart';
 import 'package:pd/features/settings/presentation/screens/settings_screen.dart';
 import 'package:pd/features/todo/presentation/screens/todo_detail_screen.dart';
 import 'package:pd/features/todo/presentation/screens/todo_home_screen.dart';
@@ -59,10 +60,7 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/prayer',
-      builder: (context, state) => const PlaceholderScreen(
-        title: 'Prayer Tracker',
-        message: 'The Muslim daily tracker lands in Phase 3.',
-      ),
+      builder: (context, state) => const PrayerDashboardScreen(),
     ),
     GoRoute(
       path: '/water',
