@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:pd/app/placeholder_screen.dart';
 import 'package:pd/features/home/presentation/screens/home_screen.dart';
 import 'package:pd/features/settings/presentation/screens/settings_screen.dart';
+import 'package:pd/features/todo/presentation/screens/todo_detail_screen.dart';
+import 'package:pd/features/todo/presentation/screens/todo_home_screen.dart';
 
 /// App navigation. Bottom tabs: Home + Settings.
 /// Feature modules are pushed as full-screen routes; in Phase 1 they render
@@ -34,10 +36,26 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/todo',
-      builder: (context, state) => const PlaceholderScreen(
-        title: 'To-Do',
-        message: 'The To-Do module lands in Phase 2.',
-      ),
+      builder: (context, state) => const TodoHomeScreen(),
+      routes: [
+        GoRoute(
+          path: 'new',
+          builder: (context, state) => const TodoDetailScreen(),
+        ),
+        GoRoute(
+          path: ':id',
+          builder: (context, state) {
+            final id = int.tryParse(state.pathParameters['id'] ?? '');
+            if (id == null) {
+              return const PlaceholderScreen(
+                title: 'To-Do',
+                message: 'That task could not be found.',
+              );
+            }
+            return TodoDetailScreen(todoId: id);
+          },
+        ),
+      ],
     ),
     GoRoute(
       path: '/prayer',

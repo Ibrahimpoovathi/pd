@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pd/app/app.dart';
 import 'package:pd/app/providers.dart';
+import 'package:pd/app/router.dart';
 import 'package:pd/core/notifications/notification_service.dart';
 import 'package:pd/core/storage/database.dart';
 import 'package:pd/core/storage/preferences.dart';
+import 'package:pd/features/todo/data/todo_notifications.dart';
+import 'package:pd/features/todo/data/todo_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
@@ -13,7 +16,16 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   final database = AppDatabase();
   final notifications = NotificationService();
-  await notifications.init();
+  await notifications.init(
+    onTap: (payload) async {
+      final todoId = TodoNotifications.todoIdFromPayload(payload);
+      if (todoId != null) router.go('/todo/$todoId');
+    },
+  );
+
+  // Re-arm day-before reminders every launch (survives reboots).
+  final pending = await TodoRepository(database).pendingWithDueDate();
+  await TodoNotifications(notifications).rescheduleAll(pending);
 
   runApp(
     ProviderScope(

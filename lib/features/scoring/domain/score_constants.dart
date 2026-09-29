@@ -53,6 +53,15 @@ abstract final class ScorePoints {
   static const pomodoroCycleBonus = 5;
 }
 
+/// Raw daily caps per section, used to normalize each section to 0-100
+/// before applying [ScoreWeights].
+abstract final class ScoreSectionCaps {
+  static const prayer = 200;
+  static const todo = 100;
+  static const screenTime = 30;
+  static const water = 30;
+}
+
 abstract final class ScoreDefaults {
   static const waterGoalCups = 8;
   static const waterCupSizeMl = 250;

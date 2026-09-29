@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:pd/core/storage/preferences.dart';
 import 'package:pd/core/theme/theme_provider.dart';
 import 'package:pd/core/widgets/progress_ring.dart';
+import 'package:pd/features/scoring/presentation/providers/score_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -88,43 +89,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
           ),
           const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  ProgressRing(
-                    progress: 0,
-                    size: 96,
-                    center: Text(
-                      '–',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Overall Score',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Complete tasks in any module to build your score. '
-                          'Prayer 40% · To-Do 30% · Screen Time 15% · Water 15%.',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          _ScoreCard(),
           const SizedBox(height: 16),
           GridView.builder(
             shrinkWrap: true,
@@ -193,4 +158,53 @@ class _ModuleCard {
     required this.route,
     required this.enabled,
   });
+}
+
+class _ScoreCard extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final score = ref.watch(todayScoreProvider);
+    final total = score.value?.totalScore ?? 0;
+    final streak = score.value?.streakDays ?? 0;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            ProgressRing(
+              progress: total / 100,
+              size: 96,
+              center: Text(
+                '$total',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Overall Score',
+                    style:
+                        Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    streak > 0
+                        ? '$streak-day streak. Prayer 40% · To-Do 30% · Screen Time 15% · Water 15%.'
+                        : 'Complete tasks in any module to build your score. '
+                            'Prayer 40% · To-Do 30% · Screen Time 15% · Water 15%.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

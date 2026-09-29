@@ -31,8 +31,12 @@ class NotificationService {
 
   bool _initialized = false;
 
-  Future<void> init() async {
+  /// Called with the notification payload when the user taps a notification.
+  Future<void> Function(String? payload)? onTap;
+
+  Future<void> init({Future<void> Function(String? payload)? onTap}) async {
     if (_initialized) return;
+    this.onTap = onTap;
 
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const ios = DarwinInitializationSettings(
@@ -42,6 +46,8 @@ class NotificationService {
     );
     await _plugin.initialize(
       settings: const InitializationSettings(android: android, iOS: ios),
+      onDidReceiveNotificationResponse: (response) =>
+          onTap?.call(response.payload),
     );
 
     tz.initializeTimeZones();
@@ -116,4 +122,40 @@ class NotificationService {
   Future<void> cancel(int id) => _plugin.cancel(id: id);
 
   Future<void> cancelAll() => _plugin.cancelAll();
+
+  /// Requests the exact-alarm permission (Android 12+). Returns true when
+  /// exact scheduling is allowed (always true on iOS / older Android).
+  Future<bool> requestExactAlarms() async {
+    final android = _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    return await android?.requestExactAlarmsPermission() ?? true;
+  }
+
+  /// Schedules a one-shot reminder. [exact]=false falls back to inexact
+  /// timing when the exact-alarm permission was denied.
+  Future<void> scheduleReminder({
+    required int id,
+    required String title,
+    required String body,
+    required tz.TZDateTime scheduledDate,
+    required String channel,
+    String? payload,
+    bool exact = true,
+  }) {
+    final androidDetails = AndroidNotificationDetails(channel, channel);
+    return _plugin.zonedSchedule(
+      id: id,
+      title: title,
+      body: body,
+      payload: payload,
+      scheduledDate: scheduledDate,
+      notificationDetails: NotificationDetails(
+        android: androidDetails,
+        iOS: const DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: exact
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexact,
+    );
+  }
 }

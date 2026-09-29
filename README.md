@@ -13,7 +13,7 @@ notification infrastructure, and placeholder routes for upcoming modules.
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Foundation: scaffold, themes, DB schema, shell, docs | Done |
-| 2 | To-Do (tabs, reminders, trash, auto-clear) | Planned |
+| 2 | To-Do (tabs, reminders, trash, auto-clear) | Done |
 | 3 | Muslim tracker (prayer calc + override + reset, ibadah) | Planned |
 | 4 | Water tracker (ring, smart reminders, history) | Planned |
 | 5 | Pomodoro (dim circle, hidden time, background, chime) | Planned |

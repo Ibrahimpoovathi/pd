@@ -207,7 +207,8 @@ class DailyScores extends Table {
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  /// [executor] is injectable so tests can use an in-memory database.
+  AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
   int get schemaVersion => 1;

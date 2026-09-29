@@ -122,3 +122,42 @@ Append-only log of what was done each session.
   detach (survives tool timeouts), NVIDIA env, waits for boot_completed.
 - `emu-kill`: graceful kill + force fallback + RAM report.
 - House rule: one emulator at a time, killed after each test.
+
+## 2026-09-27 — Phase 2: To-Do module (done, verified)
+
+### Features
+- Tabs: All / Today / Tomorrow / Favorites / Trash. Undated tasks live in
+  All only; Today = due today; Tomorrow = due tomorrow.
+- Tick → sinks to "Done" section instantly → archived to trash on leaving
+  the to-do section (`deactivate`, fire-and-forget; drift streams refresh UI,
+  no manual invalidation — invalidating there crashes, see below).
+- Trash grouped by original due date (fallback: deleted date), one-tap
+  "Clear all" with confirm, auto-clear by keep-days pref (default 7, 0 = manual).
+- Detail screen: title/notes/date/time pickers (time needs a date),
+  favorite switch, save/delete with confirms. Delete is permanent (no trash).
+- Reminders: day-before 10:00 + 18:00, exact-or-inexact by permission,
+  cancel on complete/delete, reschedule on edit, full re-arm at app start
+  (reboot-safe, no native receiver needed). Tap opens the task (payload route).
+- Manifest: POST_NOTIFICATIONS + SCHEDULE_EXACT_ALARM.
+- Scoring: 10/completion (5 overdue), +2/day streak (cap +20), daily cap 100;
+  weighted total + streaks in `daily_scores`; home ring now live.
+- `AppDatabase` takes optional executor (in-memory tests).
+
+### Verification
+- 13 tests pass (9 unit + 4 UI/scheduler), each file run separately.
+- `flutter analyze`: clean. APK rebuilt in ~15s (incremental).
+- Device (`pixel_7`, NVIDIA): install OK, first frame, no crashes.
+
+### Test-infra lessons (FakeAsync + drift + Riverpod, for future phases)
+- `flutter_timezone` channel hangs forever in widget tests → mock its
+  channel (`'flutter_timezone'` → `'UTC'`) in every widget test setUp.
+- Fake Android notification platform must EXTEND
+  `AndroidFlutterLocalNotificationsPlugin` (app code force-unwraps `!` it).
+- Never `.watch().first` a drift stream in a widget-test body: the second
+  live subscription wedges the next `pumpWidget`. Use one-shot `.get()`.
+- End widget tests with tree disposal + 1s fake-clock pump (drift's
+  zero-duration close timer), else teardown wedges the runner.
+- Keep one widget-test class per file; run files separately.
+- Fixed real bugs found by tests: `ref.invalidate` in `deactivate` after
+  unmount (removed — streams auto-update); `context.pop()` with no router
+  in tests (routed test harness).
