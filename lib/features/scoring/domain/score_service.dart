@@ -97,7 +97,9 @@ class ScoreService {
     if (record != null) {
       for (final p in PrayerName.values) {
         if (record.prayed(p)) {
-          points += ScorePoints.prayerOnTime;
+          points += record.qada(p)
+              ? ScorePoints.prayerQada
+              : ScorePoints.prayerOnTime;
           if (record.mosque(p)) points += ScorePoints.prayerMosqueBonus;
           if (record.jamaat(p)) points += ScorePoints.prayerJamaatBonus;
         }
@@ -138,7 +140,8 @@ class ScoreService {
         .clamp(0, ScorePoints.dhikrCap);
   }
 
-  /// Consecutive days strictly before [day] with all 5 fard marked.
+  /// Consecutive all-ada days strictly before [day].
+  /// A miss or any qada breaks the chain (streak resets to 0).
   Future<int> _prayerStreak(DateTime day) async {
     final rows = await (_db.select(_db.prayerRecords)
           ..where((t) => t.date.isSmallerThanValue(day))
@@ -149,7 +152,7 @@ class ScoreService {
     var cursor = day.subtract(const Duration(days: 1));
     for (final r in rows) {
       if (!isSameDay(r.date, cursor)) break;
-      if (!(r.fajr && r.dhuhr && r.asr && r.maghrib && r.isha)) break;
+      if (!r.allAdaDone) break;
       streak++;
       cursor = cursor.subtract(const Duration(days: 1));
     }

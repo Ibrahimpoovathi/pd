@@ -107,8 +107,8 @@ class _StreakBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 streakDays > 0
-                    ? '$streakDays-day full-fard streak. Miss a fard and it resets to zero.'
-                    : 'Mark all five fard to start a streak. A miss resets it to zero.',
+                    ? '$streakDays-day all-ada streak. Only on-time days count — a miss or qada resets it.'
+                    : 'Mark all five fard on time to start a streak. A miss or qada resets it.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -133,63 +133,93 @@ class _PrayerCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prayed = record.prayed(prayer);
+    final isQada = record.qada(prayer);
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Column(
-          children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Checkbox(
-                value: prayed,
-                onChanged: (_) => _setPrayed(ref, !prayed),
-              ),
-              title: Text(
-                prayer.label,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              trailing: Text(
-                time == null ? '--:--' : DateFormat('h:mm a').format(time!),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-            if (prayed)
-              Padding(
-                padding: const EdgeInsets.only(left: 16, bottom: 8),
-                child: Row(
-                  children: [
-                    FilterChip(
-                      label: const Text("Jama'at"),
-                      selected: record.jamaat(prayer),
-                      onSelected: (v) =>
-                          _setField(ref, _jamaatCompanion(v)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        // Whole card toggles: big touch target, no precise checkbox aim.
+        onTap: () => _setPrayed(ref, !prayed),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Transform.scale(
+                    scale: 1.25,
+                    child: Checkbox(
+                      value: prayed,
+                      onChanged: (_) => _setPrayed(ref, !prayed),
                     ),
-                    const SizedBox(width: 8),
-                    FilterChip(
-                      label: const Text('In mosque'),
-                      selected: record.mosque(prayer),
-                      onSelected: (v) =>
-                          _setField(ref, _mosqueCompanion(v)),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          prayer.label,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          time == null
+                              ? '--:--'
+                              : DateFormat('h:mm a').format(time!),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                  if (prayed)
+                    _AdaQadaBadge(
+                      isQada: isQada,
+                      onTap: () => _setQada(ref, !isQada),
+                    ),
+                ],
+              ),
+              if (prayed)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, bottom: 8),
+                  child: Row(
+                    children: [
+                      _EmojiToggle(
+                        emoji: '👥',
+                        label: "Jama'at — prayed with congregation",
+                        selected: record.jamaat(prayer),
+                        onTap: () => _setField(
+                            ref, _jamaatCompanion(!record.jamaat(prayer))),
+                      ),
+                      const SizedBox(width: 4),
+                      _EmojiToggle(
+                        emoji: '🕌',
+                        label: 'In mosque',
+                        selected: record.mosque(prayer),
+                        onTap: () => _setField(
+                            ref, _mosqueCompanion(!record.mosque(prayer))),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Future<void> _setPrayed(WidgetRef ref, bool value) async {
-    // Unmarking clears jama'at/mosque together to keep bonuses consistent.
+    // Unmarking clears qada + jama'at/mosque together to keep consistent.
     await savePrayerRecord(
       ref,
       record.id,
       value ? _prayedCompanion(true) : _clearedCompanion(),
     );
+  }
+
+  Future<void> _setQada(WidgetRef ref, bool value) async {
+    await savePrayerRecord(ref, record.id, _qadaCompanion(value));
   }
 
   Future<void> _setField(
@@ -242,6 +272,21 @@ class _PrayerCard extends ConsumerWidget {
     }
   }
 
+  PrayerRecordsCompanion _qadaCompanion(bool v) {
+    switch (prayer) {
+      case PrayerName.fajr:
+        return PrayerRecordsCompanion(fajrQada: Value(v));
+      case PrayerName.dhuhr:
+        return PrayerRecordsCompanion(dhuhrQada: Value(v));
+      case PrayerName.asr:
+        return PrayerRecordsCompanion(asrQada: Value(v));
+      case PrayerName.maghrib:
+        return PrayerRecordsCompanion(maghribQada: Value(v));
+      case PrayerName.isha:
+        return PrayerRecordsCompanion(ishaQada: Value(v));
+    }
+  }
+
   PrayerRecordsCompanion _clearedCompanion() {
     switch (prayer) {
       case PrayerName.fajr:
@@ -249,31 +294,135 @@ class _PrayerCard extends ConsumerWidget {
           fajr: Value(false),
           fajrJamaat: Value(false),
           fajrMosque: Value(false),
+          fajrQada: Value(false),
         );
       case PrayerName.dhuhr:
         return const PrayerRecordsCompanion(
           dhuhr: Value(false),
           dhuhrJamaat: Value(false),
           dhuhrMosque: Value(false),
+          dhuhrQada: Value(false),
         );
       case PrayerName.asr:
         return const PrayerRecordsCompanion(
           asr: Value(false),
           asrJamaat: Value(false),
           asrMosque: Value(false),
+          asrQada: Value(false),
         );
       case PrayerName.maghrib:
         return const PrayerRecordsCompanion(
           maghrib: Value(false),
           maghribJamaat: Value(false),
           maghribMosque: Value(false),
+          maghribQada: Value(false),
         );
       case PrayerName.isha:
         return const PrayerRecordsCompanion(
           isha: Value(false),
           ishaJamaat: Value(false),
           ishaMosque: Value(false),
+          ishaQada: Value(false),
         );
     }
+  }
+}
+
+/// Single ad/qd toggle badge. Defaults to ad when the prayer is marked.
+class _AdaQadaBadge extends StatelessWidget {
+  final bool isQada;
+  final VoidCallback onTap;
+
+  const _AdaQadaBadge({required this.isQada, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final bg = isQada
+        ? scheme.tertiary.withValues(alpha: 0.2)
+        : scheme.primary.withValues(alpha: 0.2);
+    final fg = isQada ? scheme.tertiary : scheme.primary;
+    return Tooltip(
+      message: isQada
+          ? 'Qada: made up after its time — tap for Ada'
+          : 'Ada: prayed on time — tap for Qada',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Semantics(
+          button: true,
+          label: isQada ? 'Qada, made up late' : 'Ada, prayed on time',
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: fg.withValues(alpha: 0.5)),
+            ),
+            child: Text(
+              isQada ? 'qd' : 'ad',
+              style: TextStyle(
+                color: fg,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Emoji-only toggle (👥 jama'at, 🕌 mosque). Greyed when off.
+class _EmojiToggle extends StatelessWidget {
+  final String emoji;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _EmojiToggle({
+    required this.emoji,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: label,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Semantics(
+          button: true,
+          label: label,
+          child: Opacity(
+            opacity: selected ? 1.0 : 0.35,
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: selected
+                    ? scheme.primary.withValues(alpha: 0.2)
+                    : Colors.transparent,
+                border: Border.all(
+                  color: selected
+                      ? scheme.primary.withValues(alpha: 0.6)
+                      : scheme.outline.withValues(alpha: 0.4),
+                ),
+              ),
+              child: Text(
+                emoji,
+                style: const TextStyle(fontSize: 26),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

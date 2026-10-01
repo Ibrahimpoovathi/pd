@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:pd/core/storage/database.dart';
 import 'package:pd/core/utils/date_helpers.dart';
 import 'package:pd/features/prayer/data/prayer_time_calculator.dart';
+import 'package:pd/features/prayer/domain/prayer_models.dart';
 
 /// Defaults for a fresh prayer-settings row.
 abstract final class PrayerSettingsDefaults {
@@ -54,8 +55,8 @@ class PrayerRepository {
         .write(entry.copyWith(updatedAt: Value(DateTime.now())));
   }
 
-  /// Consecutive days strictly before [today] with all 5 fard marked.
-  /// A missed fard breaks the chain, so the streak resets to 0.
+  /// Consecutive all-ada days strictly before [today].
+  /// A miss or any qada breaks the chain, so the streak resets to 0.
   Future<int> fardStreak(DateTime today) async {
     final day = dateOnly(today);
     final rows = await (_db.select(_db.prayerRecords)
@@ -67,7 +68,7 @@ class PrayerRepository {
     var cursor = day.subtract(const Duration(days: 1));
     for (final r in rows) {
       if (!isSameDay(r.date, cursor)) break;
-      if (!(r.fajr && r.dhuhr && r.asr && r.maghrib && r.isha)) break;
+      if (!r.allAdaDone) break;
       streak++;
       cursor = cursor.subtract(const Duration(days: 1));
     }

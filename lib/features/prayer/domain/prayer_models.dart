@@ -78,7 +78,33 @@ extension PrayerRecordX on PrayerRecord {
     }
   }
 
+  /// Made up after its time (qada) rather than on time (ada).
+  bool qada(PrayerName p) {
+    switch (p) {
+      case PrayerName.fajr:
+        return fajrQada;
+      case PrayerName.dhuhr:
+        return dhuhrQada;
+      case PrayerName.asr:
+        return asrQada;
+      case PrayerName.maghrib:
+        return maghribQada;
+      case PrayerName.isha:
+        return ishaQada;
+    }
+  }
+
   /// True when all five fard prayers are marked.
   bool get allFardDone =>
       fajr && dhuhr && asr && maghrib && isha;
+
+  /// True when all five were prayed on time (no qada). Only all-ada days
+  /// continue the streak.
+  bool get allAdaDone =>
+      allFardDone &&
+      !fajrQada &&
+      !dhuhrQada &&
+      !asrQada &&
+      !maghribQada &&
+      !ishaQada;
 }

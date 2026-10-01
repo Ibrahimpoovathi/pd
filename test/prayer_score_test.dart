@@ -115,8 +115,28 @@ void main() {
       expect((await scores.todayRow(today))?.prayerScore, 200);
     });
 
-    test('streak bonus +3/day, miss resets to zero', () async {
+    test('qada earns 8 and breaks the streak', () async {
       final today = day(2026, 9, 27);
+      await seedRecord(repo, today.subtract(const Duration(days: 1)),
+          allFard: true);
+      await seedRecord(
+        repo,
+        today,
+        allFard: true,
+        extra: const PrayerRecordsCompanion(fajrQada: Value(true)),
+      );
+      await scores.recordPrayerDay(today, now: today);
+      // 4 ada * 15 + 1 qada * 8 = 68, +3 streak bonus from yesterday.
+      expect((await scores.todayRow(today))?.prayerScore, 71);
+      // Yesterday still counts (all ada); tomorrow the qada breaks it.
+      expect(await repo.fardStreak(today), 1);
+      expect(
+        await repo.fardStreak(today.add(const Duration(days: 1))),
+        0,
+      );
+    });
+
+    test('streak bonus +3/day, miss resets to zero', () async {      final today = day(2026, 9, 27);
       // 2 full days, then a miss yesterday.
       await seedRecord(repo, today.subtract(const Duration(days: 3)),
           allFard: true);

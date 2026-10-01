@@ -23,6 +23,7 @@ abstract final class ScorePoints {
 
   // Prayer (fard)
   static const prayerOnTime = 15;
+  static const prayerQada = 8;
   static const prayerMosqueBonus = 5;
   static const prayerJamaatBonus = 3;
   static const prayerStreakBonusPerDay = 3;

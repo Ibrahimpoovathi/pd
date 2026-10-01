@@ -1333,6 +1333,81 @@ class $PrayerRecordsTable extends PrayerRecords
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _fajrQadaMeta = const VerificationMeta(
+    'fajrQada',
+  );
+  @override
+  late final GeneratedColumn<bool> fajrQada = GeneratedColumn<bool>(
+    'fajr_qada',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("fajr_qada" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _dhuhrQadaMeta = const VerificationMeta(
+    'dhuhrQada',
+  );
+  @override
+  late final GeneratedColumn<bool> dhuhrQada = GeneratedColumn<bool>(
+    'dhuhr_qada',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dhuhr_qada" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _asrQadaMeta = const VerificationMeta(
+    'asrQada',
+  );
+  @override
+  late final GeneratedColumn<bool> asrQada = GeneratedColumn<bool>(
+    'asr_qada',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("asr_qada" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _maghribQadaMeta = const VerificationMeta(
+    'maghribQada',
+  );
+  @override
+  late final GeneratedColumn<bool> maghribQada = GeneratedColumn<bool>(
+    'maghrib_qada',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("maghrib_qada" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _ishaQadaMeta = const VerificationMeta(
+    'ishaQada',
+  );
+  @override
+  late final GeneratedColumn<bool> ishaQada = GeneratedColumn<bool>(
+    'isha_qada',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("isha_qada" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _tahajjudMeta = const VerificationMeta(
     'tahajjud',
   );
@@ -1545,6 +1620,11 @@ class $PrayerRecordsTable extends PrayerRecords
     asrMosque,
     maghribMosque,
     ishaMosque,
+    fajrQada,
+    dhuhrQada,
+    asrQada,
+    maghribQada,
+    ishaQada,
     tahajjud,
     duha,
     quranWaqiah,
@@ -1683,6 +1763,39 @@ class $PrayerRecordsTable extends PrayerRecords
       context.handle(
         _ishaMosqueMeta,
         ishaMosque.isAcceptableOrUnknown(data['isha_mosque']!, _ishaMosqueMeta),
+      );
+    }
+    if (data.containsKey('fajr_qada')) {
+      context.handle(
+        _fajrQadaMeta,
+        fajrQada.isAcceptableOrUnknown(data['fajr_qada']!, _fajrQadaMeta),
+      );
+    }
+    if (data.containsKey('dhuhr_qada')) {
+      context.handle(
+        _dhuhrQadaMeta,
+        dhuhrQada.isAcceptableOrUnknown(data['dhuhr_qada']!, _dhuhrQadaMeta),
+      );
+    }
+    if (data.containsKey('asr_qada')) {
+      context.handle(
+        _asrQadaMeta,
+        asrQada.isAcceptableOrUnknown(data['asr_qada']!, _asrQadaMeta),
+      );
+    }
+    if (data.containsKey('maghrib_qada')) {
+      context.handle(
+        _maghribQadaMeta,
+        maghribQada.isAcceptableOrUnknown(
+          data['maghrib_qada']!,
+          _maghribQadaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('isha_qada')) {
+      context.handle(
+        _ishaQadaMeta,
+        ishaQada.isAcceptableOrUnknown(data['isha_qada']!, _ishaQadaMeta),
       );
     }
     if (data.containsKey('tahajjud')) {
@@ -1870,6 +1983,26 @@ class $PrayerRecordsTable extends PrayerRecords
         DriftSqlType.bool,
         data['${effectivePrefix}isha_mosque'],
       )!,
+      fajrQada: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}fajr_qada'],
+      )!,
+      dhuhrQada: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dhuhr_qada'],
+      )!,
+      asrQada: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}asr_qada'],
+      )!,
+      maghribQada: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}maghrib_qada'],
+      )!,
+      ishaQada: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}isha_qada'],
+      )!,
       tahajjud: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}tahajjud'],
@@ -1953,6 +2086,11 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
   final bool asrMosque;
   final bool maghribMosque;
   final bool ishaMosque;
+  final bool fajrQada;
+  final bool dhuhrQada;
+  final bool asrQada;
+  final bool maghribQada;
+  final bool ishaQada;
   final bool tahajjud;
   final bool duha;
   final bool quranWaqiah;
@@ -1985,6 +2123,11 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
     required this.asrMosque,
     required this.maghribMosque,
     required this.ishaMosque,
+    required this.fajrQada,
+    required this.dhuhrQada,
+    required this.asrQada,
+    required this.maghribQada,
+    required this.ishaQada,
     required this.tahajjud,
     required this.duha,
     required this.quranWaqiah,
@@ -2020,6 +2163,11 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
     map['asr_mosque'] = Variable<bool>(asrMosque);
     map['maghrib_mosque'] = Variable<bool>(maghribMosque);
     map['isha_mosque'] = Variable<bool>(ishaMosque);
+    map['fajr_qada'] = Variable<bool>(fajrQada);
+    map['dhuhr_qada'] = Variable<bool>(dhuhrQada);
+    map['asr_qada'] = Variable<bool>(asrQada);
+    map['maghrib_qada'] = Variable<bool>(maghribQada);
+    map['isha_qada'] = Variable<bool>(ishaQada);
     map['tahajjud'] = Variable<bool>(tahajjud);
     map['duha'] = Variable<bool>(duha);
     map['quran_waqiah'] = Variable<bool>(quranWaqiah);
@@ -2056,6 +2204,11 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
       asrMosque: Value(asrMosque),
       maghribMosque: Value(maghribMosque),
       ishaMosque: Value(ishaMosque),
+      fajrQada: Value(fajrQada),
+      dhuhrQada: Value(dhuhrQada),
+      asrQada: Value(asrQada),
+      maghribQada: Value(maghribQada),
+      ishaQada: Value(ishaQada),
       tahajjud: Value(tahajjud),
       duha: Value(duha),
       quranWaqiah: Value(quranWaqiah),
@@ -2096,6 +2249,11 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
       asrMosque: serializer.fromJson<bool>(json['asrMosque']),
       maghribMosque: serializer.fromJson<bool>(json['maghribMosque']),
       ishaMosque: serializer.fromJson<bool>(json['ishaMosque']),
+      fajrQada: serializer.fromJson<bool>(json['fajrQada']),
+      dhuhrQada: serializer.fromJson<bool>(json['dhuhrQada']),
+      asrQada: serializer.fromJson<bool>(json['asrQada']),
+      maghribQada: serializer.fromJson<bool>(json['maghribQada']),
+      ishaQada: serializer.fromJson<bool>(json['ishaQada']),
       tahajjud: serializer.fromJson<bool>(json['tahajjud']),
       duha: serializer.fromJson<bool>(json['duha']),
       quranWaqiah: serializer.fromJson<bool>(json['quranWaqiah']),
@@ -2133,6 +2291,11 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
       'asrMosque': serializer.toJson<bool>(asrMosque),
       'maghribMosque': serializer.toJson<bool>(maghribMosque),
       'ishaMosque': serializer.toJson<bool>(ishaMosque),
+      'fajrQada': serializer.toJson<bool>(fajrQada),
+      'dhuhrQada': serializer.toJson<bool>(dhuhrQada),
+      'asrQada': serializer.toJson<bool>(asrQada),
+      'maghribQada': serializer.toJson<bool>(maghribQada),
+      'ishaQada': serializer.toJson<bool>(ishaQada),
       'tahajjud': serializer.toJson<bool>(tahajjud),
       'duha': serializer.toJson<bool>(duha),
       'quranWaqiah': serializer.toJson<bool>(quranWaqiah),
@@ -2168,6 +2331,11 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
     bool? asrMosque,
     bool? maghribMosque,
     bool? ishaMosque,
+    bool? fajrQada,
+    bool? dhuhrQada,
+    bool? asrQada,
+    bool? maghribQada,
+    bool? ishaQada,
     bool? tahajjud,
     bool? duha,
     bool? quranWaqiah,
@@ -2200,6 +2368,11 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
     asrMosque: asrMosque ?? this.asrMosque,
     maghribMosque: maghribMosque ?? this.maghribMosque,
     ishaMosque: ishaMosque ?? this.ishaMosque,
+    fajrQada: fajrQada ?? this.fajrQada,
+    dhuhrQada: dhuhrQada ?? this.dhuhrQada,
+    asrQada: asrQada ?? this.asrQada,
+    maghribQada: maghribQada ?? this.maghribQada,
+    ishaQada: ishaQada ?? this.ishaQada,
     tahajjud: tahajjud ?? this.tahajjud,
     duha: duha ?? this.duha,
     quranWaqiah: quranWaqiah ?? this.quranWaqiah,
@@ -2250,6 +2423,13 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
       ishaMosque: data.ishaMosque.present
           ? data.ishaMosque.value
           : this.ishaMosque,
+      fajrQada: data.fajrQada.present ? data.fajrQada.value : this.fajrQada,
+      dhuhrQada: data.dhuhrQada.present ? data.dhuhrQada.value : this.dhuhrQada,
+      asrQada: data.asrQada.present ? data.asrQada.value : this.asrQada,
+      maghribQada: data.maghribQada.present
+          ? data.maghribQada.value
+          : this.maghribQada,
+      ishaQada: data.ishaQada.present ? data.ishaQada.value : this.ishaQada,
       tahajjud: data.tahajjud.present ? data.tahajjud.value : this.tahajjud,
       duha: data.duha.present ? data.duha.value : this.duha,
       quranWaqiah: data.quranWaqiah.present
@@ -2305,6 +2485,11 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
           ..write('asrMosque: $asrMosque, ')
           ..write('maghribMosque: $maghribMosque, ')
           ..write('ishaMosque: $ishaMosque, ')
+          ..write('fajrQada: $fajrQada, ')
+          ..write('dhuhrQada: $dhuhrQada, ')
+          ..write('asrQada: $asrQada, ')
+          ..write('maghribQada: $maghribQada, ')
+          ..write('ishaQada: $ishaQada, ')
           ..write('tahajjud: $tahajjud, ')
           ..write('duha: $duha, ')
           ..write('quranWaqiah: $quranWaqiah, ')
@@ -2342,6 +2527,11 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
     asrMosque,
     maghribMosque,
     ishaMosque,
+    fajrQada,
+    dhuhrQada,
+    asrQada,
+    maghribQada,
+    ishaQada,
     tahajjud,
     duha,
     quranWaqiah,
@@ -2378,6 +2568,11 @@ class PrayerRecord extends DataClass implements Insertable<PrayerRecord> {
           other.asrMosque == this.asrMosque &&
           other.maghribMosque == this.maghribMosque &&
           other.ishaMosque == this.ishaMosque &&
+          other.fajrQada == this.fajrQada &&
+          other.dhuhrQada == this.dhuhrQada &&
+          other.asrQada == this.asrQada &&
+          other.maghribQada == this.maghribQada &&
+          other.ishaQada == this.ishaQada &&
           other.tahajjud == this.tahajjud &&
           other.duha == this.duha &&
           other.quranWaqiah == this.quranWaqiah &&
@@ -2412,6 +2607,11 @@ class PrayerRecordsCompanion extends UpdateCompanion<PrayerRecord> {
   final Value<bool> asrMosque;
   final Value<bool> maghribMosque;
   final Value<bool> ishaMosque;
+  final Value<bool> fajrQada;
+  final Value<bool> dhuhrQada;
+  final Value<bool> asrQada;
+  final Value<bool> maghribQada;
+  final Value<bool> ishaQada;
   final Value<bool> tahajjud;
   final Value<bool> duha;
   final Value<bool> quranWaqiah;
@@ -2444,6 +2644,11 @@ class PrayerRecordsCompanion extends UpdateCompanion<PrayerRecord> {
     this.asrMosque = const Value.absent(),
     this.maghribMosque = const Value.absent(),
     this.ishaMosque = const Value.absent(),
+    this.fajrQada = const Value.absent(),
+    this.dhuhrQada = const Value.absent(),
+    this.asrQada = const Value.absent(),
+    this.maghribQada = const Value.absent(),
+    this.ishaQada = const Value.absent(),
     this.tahajjud = const Value.absent(),
     this.duha = const Value.absent(),
     this.quranWaqiah = const Value.absent(),
@@ -2477,6 +2682,11 @@ class PrayerRecordsCompanion extends UpdateCompanion<PrayerRecord> {
     this.asrMosque = const Value.absent(),
     this.maghribMosque = const Value.absent(),
     this.ishaMosque = const Value.absent(),
+    this.fajrQada = const Value.absent(),
+    this.dhuhrQada = const Value.absent(),
+    this.asrQada = const Value.absent(),
+    this.maghribQada = const Value.absent(),
+    this.ishaQada = const Value.absent(),
     this.tahajjud = const Value.absent(),
     this.duha = const Value.absent(),
     this.quranWaqiah = const Value.absent(),
@@ -2510,6 +2720,11 @@ class PrayerRecordsCompanion extends UpdateCompanion<PrayerRecord> {
     Expression<bool>? asrMosque,
     Expression<bool>? maghribMosque,
     Expression<bool>? ishaMosque,
+    Expression<bool>? fajrQada,
+    Expression<bool>? dhuhrQada,
+    Expression<bool>? asrQada,
+    Expression<bool>? maghribQada,
+    Expression<bool>? ishaQada,
     Expression<bool>? tahajjud,
     Expression<bool>? duha,
     Expression<bool>? quranWaqiah,
@@ -2543,6 +2758,11 @@ class PrayerRecordsCompanion extends UpdateCompanion<PrayerRecord> {
       if (asrMosque != null) 'asr_mosque': asrMosque,
       if (maghribMosque != null) 'maghrib_mosque': maghribMosque,
       if (ishaMosque != null) 'isha_mosque': ishaMosque,
+      if (fajrQada != null) 'fajr_qada': fajrQada,
+      if (dhuhrQada != null) 'dhuhr_qada': dhuhrQada,
+      if (asrQada != null) 'asr_qada': asrQada,
+      if (maghribQada != null) 'maghrib_qada': maghribQada,
+      if (ishaQada != null) 'isha_qada': ishaQada,
       if (tahajjud != null) 'tahajjud': tahajjud,
       if (duha != null) 'duha': duha,
       if (quranWaqiah != null) 'quran_waqiah': quranWaqiah,
@@ -2578,6 +2798,11 @@ class PrayerRecordsCompanion extends UpdateCompanion<PrayerRecord> {
     Value<bool>? asrMosque,
     Value<bool>? maghribMosque,
     Value<bool>? ishaMosque,
+    Value<bool>? fajrQada,
+    Value<bool>? dhuhrQada,
+    Value<bool>? asrQada,
+    Value<bool>? maghribQada,
+    Value<bool>? ishaQada,
     Value<bool>? tahajjud,
     Value<bool>? duha,
     Value<bool>? quranWaqiah,
@@ -2611,6 +2836,11 @@ class PrayerRecordsCompanion extends UpdateCompanion<PrayerRecord> {
       asrMosque: asrMosque ?? this.asrMosque,
       maghribMosque: maghribMosque ?? this.maghribMosque,
       ishaMosque: ishaMosque ?? this.ishaMosque,
+      fajrQada: fajrQada ?? this.fajrQada,
+      dhuhrQada: dhuhrQada ?? this.dhuhrQada,
+      asrQada: asrQada ?? this.asrQada,
+      maghribQada: maghribQada ?? this.maghribQada,
+      ishaQada: ishaQada ?? this.ishaQada,
       tahajjud: tahajjud ?? this.tahajjud,
       duha: duha ?? this.duha,
       quranWaqiah: quranWaqiah ?? this.quranWaqiah,
@@ -2682,6 +2912,21 @@ class PrayerRecordsCompanion extends UpdateCompanion<PrayerRecord> {
     if (ishaMosque.present) {
       map['isha_mosque'] = Variable<bool>(ishaMosque.value);
     }
+    if (fajrQada.present) {
+      map['fajr_qada'] = Variable<bool>(fajrQada.value);
+    }
+    if (dhuhrQada.present) {
+      map['dhuhr_qada'] = Variable<bool>(dhuhrQada.value);
+    }
+    if (asrQada.present) {
+      map['asr_qada'] = Variable<bool>(asrQada.value);
+    }
+    if (maghribQada.present) {
+      map['maghrib_qada'] = Variable<bool>(maghribQada.value);
+    }
+    if (ishaQada.present) {
+      map['isha_qada'] = Variable<bool>(ishaQada.value);
+    }
     if (tahajjud.present) {
       map['tahajjud'] = Variable<bool>(tahajjud.value);
     }
@@ -2747,6 +2992,11 @@ class PrayerRecordsCompanion extends UpdateCompanion<PrayerRecord> {
           ..write('asrMosque: $asrMosque, ')
           ..write('maghribMosque: $maghribMosque, ')
           ..write('ishaMosque: $ishaMosque, ')
+          ..write('fajrQada: $fajrQada, ')
+          ..write('dhuhrQada: $dhuhrQada, ')
+          ..write('asrQada: $asrQada, ')
+          ..write('maghribQada: $maghribQada, ')
+          ..write('ishaQada: $ishaQada, ')
           ..write('tahajjud: $tahajjud, ')
           ..write('duha: $duha, ')
           ..write('quranWaqiah: $quranWaqiah, ')
@@ -6880,6 +7130,11 @@ typedef $$PrayerRecordsTableCreateCompanionBuilder =
       Value<bool> asrMosque,
       Value<bool> maghribMosque,
       Value<bool> ishaMosque,
+      Value<bool> fajrQada,
+      Value<bool> dhuhrQada,
+      Value<bool> asrQada,
+      Value<bool> maghribQada,
+      Value<bool> ishaQada,
       Value<bool> tahajjud,
       Value<bool> duha,
       Value<bool> quranWaqiah,
@@ -6914,6 +7169,11 @@ typedef $$PrayerRecordsTableUpdateCompanionBuilder =
       Value<bool> asrMosque,
       Value<bool> maghribMosque,
       Value<bool> ishaMosque,
+      Value<bool> fajrQada,
+      Value<bool> dhuhrQada,
+      Value<bool> asrQada,
+      Value<bool> maghribQada,
+      Value<bool> ishaQada,
       Value<bool> tahajjud,
       Value<bool> duha,
       Value<bool> quranWaqiah,
@@ -7021,6 +7281,31 @@ class $$PrayerRecordsTableFilterComposer
 
   ColumnFilters<bool> get ishaMosque => $composableBuilder(
     column: $table.ishaMosque,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get fajrQada => $composableBuilder(
+    column: $table.fajrQada,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get dhuhrQada => $composableBuilder(
+    column: $table.dhuhrQada,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get asrQada => $composableBuilder(
+    column: $table.asrQada,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get maghribQada => $composableBuilder(
+    column: $table.maghribQada,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ishaQada => $composableBuilder(
+    column: $table.ishaQada,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7189,6 +7474,31 @@ class $$PrayerRecordsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get fajrQada => $composableBuilder(
+    column: $table.fajrQada,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get dhuhrQada => $composableBuilder(
+    column: $table.dhuhrQada,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get asrQada => $composableBuilder(
+    column: $table.asrQada,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get maghribQada => $composableBuilder(
+    column: $table.maghribQada,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get ishaQada => $composableBuilder(
+    column: $table.ishaQada,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get tahajjud => $composableBuilder(
     column: $table.tahajjud,
     builder: (column) => ColumnOrderings(column),
@@ -7336,6 +7646,23 @@ class $$PrayerRecordsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<bool> get fajrQada =>
+      $composableBuilder(column: $table.fajrQada, builder: (column) => column);
+
+  GeneratedColumn<bool> get dhuhrQada =>
+      $composableBuilder(column: $table.dhuhrQada, builder: (column) => column);
+
+  GeneratedColumn<bool> get asrQada =>
+      $composableBuilder(column: $table.asrQada, builder: (column) => column);
+
+  GeneratedColumn<bool> get maghribQada => $composableBuilder(
+    column: $table.maghribQada,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get ishaQada =>
+      $composableBuilder(column: $table.ishaQada, builder: (column) => column);
+
   GeneratedColumn<bool> get tahajjud =>
       $composableBuilder(column: $table.tahajjud, builder: (column) => column);
 
@@ -7445,6 +7772,11 @@ class $$PrayerRecordsTableTableManager
                 Value<bool> asrMosque = const Value.absent(),
                 Value<bool> maghribMosque = const Value.absent(),
                 Value<bool> ishaMosque = const Value.absent(),
+                Value<bool> fajrQada = const Value.absent(),
+                Value<bool> dhuhrQada = const Value.absent(),
+                Value<bool> asrQada = const Value.absent(),
+                Value<bool> maghribQada = const Value.absent(),
+                Value<bool> ishaQada = const Value.absent(),
                 Value<bool> tahajjud = const Value.absent(),
                 Value<bool> duha = const Value.absent(),
                 Value<bool> quranWaqiah = const Value.absent(),
@@ -7477,6 +7809,11 @@ class $$PrayerRecordsTableTableManager
                 asrMosque: asrMosque,
                 maghribMosque: maghribMosque,
                 ishaMosque: ishaMosque,
+                fajrQada: fajrQada,
+                dhuhrQada: dhuhrQada,
+                asrQada: asrQada,
+                maghribQada: maghribQada,
+                ishaQada: ishaQada,
                 tahajjud: tahajjud,
                 duha: duha,
                 quranWaqiah: quranWaqiah,
@@ -7511,6 +7848,11 @@ class $$PrayerRecordsTableTableManager
                 Value<bool> asrMosque = const Value.absent(),
                 Value<bool> maghribMosque = const Value.absent(),
                 Value<bool> ishaMosque = const Value.absent(),
+                Value<bool> fajrQada = const Value.absent(),
+                Value<bool> dhuhrQada = const Value.absent(),
+                Value<bool> asrQada = const Value.absent(),
+                Value<bool> maghribQada = const Value.absent(),
+                Value<bool> ishaQada = const Value.absent(),
                 Value<bool> tahajjud = const Value.absent(),
                 Value<bool> duha = const Value.absent(),
                 Value<bool> quranWaqiah = const Value.absent(),
@@ -7543,6 +7885,11 @@ class $$PrayerRecordsTableTableManager
                 asrMosque: asrMosque,
                 maghribMosque: maghribMosque,
                 ishaMosque: ishaMosque,
+                fajrQada: fajrQada,
+                dhuhrQada: dhuhrQada,
+                asrQada: asrQada,
+                maghribQada: maghribQada,
+                ishaQada: ishaQada,
                 tahajjud: tahajjud,
                 duha: duha,
                 quranWaqiah: quranWaqiah,

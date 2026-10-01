@@ -26,13 +26,30 @@ void main() {
     await tester.tap(find.byType(Checkbox).first);
     await tester.pumpAndSettle();
 
-    final rec = await PrayerRepository(env.db).getOrCreateToday();
+    var rec = await PrayerRepository(env.db).getOrCreateToday();
     expect(rec.fajr, isTrue);
+    expect(rec.fajrQada, isFalse);
 
-    final row = await ScoreService(env.db).todayRow();
+    // Ada badge (default) + emoji toggles appear.
+    expect(find.text('ad'), findsOneWidget);
+    expect(find.text('👥'), findsOneWidget);
+    expect(find.text('🕌'), findsOneWidget);
+
+    var row = await ScoreService(env.db).todayRow();
     expect(row?.prayerScore, 15);
     // Overall: 0.4 * (15/200) * 100 = 3.
     expect(row?.totalScore, 3);
+
+    // Flip the badge to qada: 8 points.
+    await tester.tap(find.text('ad'));
+    await tester.pumpAndSettle();
+
+    rec = await PrayerRepository(env.db).getOrCreateToday();
+    expect(rec.fajrQada, isTrue);
+    expect(find.text('qd'), findsOneWidget);
+
+    row = await ScoreService(env.db).todayRow();
+    expect(row?.prayerScore, 8);
 
     await disposeTree(tester);
   });

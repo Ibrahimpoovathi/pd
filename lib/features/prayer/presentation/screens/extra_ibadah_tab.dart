@@ -265,9 +265,14 @@ class _DhikrRowState extends State<_DhikrRow> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Checkbox(
-        value: widget.done,
-        onChanged: (v) => widget.onDone(v ?? false),
+      // Whole row toggles; the count field keeps its own taps for typing.
+      onTap: () => widget.onDone(!widget.done),
+      leading: Transform.scale(
+        scale: 1.2,
+        child: Checkbox(
+          value: widget.done,
+          onChanged: (v) => widget.onDone(v ?? false),
+        ),
       ),
       title: Text(widget.label),
       trailing: SizedBox(

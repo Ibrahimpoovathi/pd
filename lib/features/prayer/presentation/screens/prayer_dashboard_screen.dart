@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pd/core/storage/preferences.dart';
 import 'package:pd/core/theme/theme_provider.dart';
 import 'package:pd/features/prayer/presentation/screens/extra_ibadah_tab.dart';
+import 'package:pd/features/prayer/presentation/screens/prayer_help_sheet.dart';
 import 'package:pd/features/prayer/presentation/screens/prayer_settings_tab.dart';
 import 'package:pd/features/prayer/presentation/screens/prayers_tab.dart';
 
@@ -59,6 +60,11 @@ class PrayerDashboardScreen extends ConsumerWidget {
             ExtraIbadahTab(),
             PrayerSettingsTab(),
           ],
+        ),
+        floatingActionButton: FloatingActionButton.small(
+          tooltip: 'What do the symbols mean?',
+          onPressed: () => PrayerHelpSheet.show(context),
+          child: const Text('❓', style: TextStyle(fontSize: 22)),
         ),
       ),
     );

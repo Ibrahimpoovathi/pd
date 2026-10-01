@@ -67,6 +67,13 @@ class PrayerRecords extends Table {
   BoolColumn get maghribMosque => boolean().withDefault(const Constant(false))();
   BoolColumn get ishaMosque => boolean().withDefault(const Constant(false))();
 
+  // Made up after its time (qada) rather than on time (ada).
+  BoolColumn get fajrQada => boolean().withDefault(const Constant(false))();
+  BoolColumn get dhuhrQada => boolean().withDefault(const Constant(false))();
+  BoolColumn get asrQada => boolean().withDefault(const Constant(false))();
+  BoolColumn get maghribQada => boolean().withDefault(const Constant(false))();
+  BoolColumn get ishaQada => boolean().withDefault(const Constant(false))();
+
   // Extra ibadah.
   BoolColumn get tahajjud => boolean().withDefault(const Constant(false))();
   BoolColumn get duha => boolean().withDefault(const Constant(false))();
@@ -215,7 +222,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -224,6 +231,13 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(prayerSettings, prayerSettings.latitude);
             await m.addColumn(prayerSettings, prayerSettings.longitude);
             await m.addColumn(prayerSettings, prayerSettings.locationLabel);
+          }
+          if (from < 3) {
+            await m.addColumn(prayerRecords, prayerRecords.fajrQada);
+            await m.addColumn(prayerRecords, prayerRecords.dhuhrQada);
+            await m.addColumn(prayerRecords, prayerRecords.asrQada);
+            await m.addColumn(prayerRecords, prayerRecords.maghribQada);
+            await m.addColumn(prayerRecords, prayerRecords.ishaQada);
           }
         },
       );
