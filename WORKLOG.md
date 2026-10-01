@@ -220,3 +220,36 @@ Append-only log of what was done each session.
 - `flutter pub add geolocation` (old unmaintained package) breaks resolution;
   `geolocator` alone is correct.
 - DropdownButtonFormField `value:` is deprecated → `initialValue:`.
+
+## 2026-10-01 — Phase 3 UX pack + release pipeline (done, verified)
+
+### UX (prayer tracker)
+- Whole prayer card toggles prayed (was: checkbox only); checkboxes 1.25x.
+  Dhikr rows: whole row toggles (count field keeps its own taps).
+- Jama'at/mosque FilterChips → emoji-only toggles (👥 🕌, greyed when off,
+  tooltips + screen-reader labels). Verified rendering on emulator.
+- Single ad/qd badge per card (default ad, tap flips). Unmarking clears
+  prayed+qada+jamaat+mosque. ❓ FAB on dashboard opens a bottom-sheet legend
+  (👥 🕌 ad qd + streak rule + row-tap hint).
+- Scoring: ada 15 / qada 8; streak needs all-ada days.
+
+### DB
+- v3: 5 `*_qada` bool columns on prayer_records (migration verified pattern).
+
+### GitHub 100MB fix
+- Purged 3× 200MB debug APKs from history via git-filter-repo
+  (.git 776KB now; remote re-added — SSH push from here is blocked, push is
+  manual from an authorized machine).
+- Release signing: `~/.android/pd-release.keystore` (outside repo) +
+  `android/key.properties` (gitignored by default); build.gradle.kts uses
+  release signing with debug fallback when key.properties is absent.
+- Universal release APK: **64.3MB** (<100MB, no split needed).
+  Standing rule amended: stage verified release APKs (history + latest).
+
+### Verification
+- 28 tests pass (incl. new qada math + badge widget flow).
+- Release on `pixel_7`: clean install, **first frame 934ms** (vs 9-14s debug),
+  no crashes — transition stutter almost certainly resolved by release.
+- Staged `releases/pd-phase3-prayer-release.apk` + `pd-latest-release.apk`
+  (sha1-identical to tested build). NOTE: release signature differs from
+  debug — phone must uninstall any debug build first (data wiped).

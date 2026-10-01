@@ -62,19 +62,19 @@ separately, excluded from the overall score. See
 
 ## Install on your phone
 
-After every phase, a tested debug APK is staged in `releases/`:
+After every phase, a tested release APK is staged in `releases/`:
 
 ```
-releases/pd-latest-debug.apk          # always the newest build (grab this)
-releases/pd-phase2-todo-debug.apk     # Phase 2: To-Do module
-releases/pd-phase3-prayer-debug.apk   # Phase 3: Muslim tracker
+releases/pd-latest-release.apk          # always the newest build (grab this)
+releases/pd-phase3-prayer-release.apk  # Phase 3: Muslim tracker + UX pack
 ```
 
 1. Copy the APK to your phone (USB, file share, QR — any method).
 2. Open it on the phone and allow **"Install unknown apps"** once when asked.
-3. The app installs as **pd** with the dark monogram icon. Debug builds can
-   be installed alongside (and over) previous ones; your local data is kept
-   on upgrade, wiped on uninstall.
+3. The app installs as **pd** with the dark monogram icon.
+4. Switching from an older debug build to release: uninstall the debug app
+   first (different signature; local data is wiped). Release-to-release
+   upgrades keep your data.
 
 ## Development
 
