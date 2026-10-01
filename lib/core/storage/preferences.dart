@@ -27,4 +27,7 @@ abstract final class PrefKeys {
 
   // To-do trash auto-clear (days to keep, 0 = manual only).
   static const todoTrashKeepDays = 'todo_trash_keep_days';
+
+  // Exact-alarm permission state (cached; only prompt with in-app context).
+  static const exactAlarmsGranted = 'exact_alarms_granted';
 }

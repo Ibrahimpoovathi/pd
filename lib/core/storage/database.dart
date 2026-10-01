@@ -121,6 +121,8 @@ class WaterRecords extends Table {
   IntColumn get cupsConsumed => integer().withDefault(const Constant(0))();
   IntColumn get cupSizeMl => integer().withDefault(const Constant(250))();
   IntColumn get goalCups => integer().withDefault(const Constant(8))();
+  // Millilitres drunk (source of truth; cups derived). Backfilled on v4.
+  IntColumn get mlConsumed => integer().withDefault(const Constant(0))();
   // Snapshot of wake/sleep used for reminder scheduling that day.
   IntColumn get wakeTimeMinutes => integer().withDefault(const Constant(420))();
   IntColumn get sleepTimeMinutes => integer().withDefault(const Constant(1380))();
@@ -222,7 +224,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -238,6 +240,12 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(prayerRecords, prayerRecords.asrQada);
             await m.addColumn(prayerRecords, prayerRecords.maghribQada);
             await m.addColumn(prayerRecords, prayerRecords.ishaQada);
+          }
+          if (from < 4) {
+            await m.addColumn(waterRecords, waterRecords.mlConsumed);
+            await m.database.customStatement(
+              'UPDATE water_records SET ml_consumed = cups_consumed * cup_size_ml',
+            );
           }
         },
       );

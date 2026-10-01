@@ -66,7 +66,9 @@ After every phase, a tested release APK is staged in `releases/`:
 
 ```
 releases/pd-latest-release.apk          # always the newest build (grab this)
-releases/pd-phase3-prayer-release.apk  # Phase 3: Muslim tracker + UX pack
+releases/pd-phase2-todo-debug.apk       # Phase 2: To-Do module
+releases/pd-phase3-prayer-release.apk   # Phase 3: Muslim tracker + UX pack
+releases/pd-phase4-water-release.apk    # Phase 4: Water tracker
 ```
 
 1. Copy the APK to your phone (USB, file share, QR — any method).

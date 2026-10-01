@@ -166,6 +166,46 @@ class ScoreService {
     return streak;
   }
 
+  /// Recomputes the water section for the record's day. Goal met earns
+  /// base + streak bonus (section cap bounds it). Idempotent.
+  Future<void> recordWaterDay(WaterRecord record, {DateTime? now}) async {
+    final today = _day(now ?? DateTime.now());
+    final day = _day(record.date);
+    final met =
+        record.mlConsumed >= record.goalCups * record.cupSizeMl;
+    var points = 0;
+    if (met) {
+      final streak = await _waterStreak(day);
+      points = ScorePoints.waterGoalMet +
+          streak * ScorePoints.waterStreakBonusPerDay;
+    }
+    if (!isSameDay(day, today)) return;
+    final row = await _getOrCreate(today);
+    await (_db.update(_db.dailyScores)..where((t) => t.id.equals(row.id)))
+        .write(DailyScoresCompanion(
+            waterScore:
+                Value(points.clamp(0, ScoreSectionCaps.water))));
+    await recalcToday(today);
+  }
+
+  /// Consecutive goal-met days strictly before [day] (snapshot goals).
+  Future<int> _waterStreak(DateTime day) async {
+    final rows = await (_db.select(_db.waterRecords)
+          ..where((t) => t.date.isSmallerThanValue(day))
+          ..orderBy([(t) => OrderingTerm.desc(t.date)])
+          ..limit(366))
+        .get();
+    var streak = 0;
+    var cursor = day.subtract(const Duration(days: 1));
+    for (final r in rows) {
+      if (!isSameDay(r.date, cursor)) break;
+      if (r.mlConsumed < r.goalCups * r.cupSizeMl) break;
+      streak++;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    return streak;
+  }
+
   /// Recomputes [DailyScores.totalScore] (weighted 0-100) and
   /// [DailyScores.streakDays] (consecutive active days).
   Future<void> recalcToday([DateTime? now]) async {

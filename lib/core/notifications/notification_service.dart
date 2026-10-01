@@ -1,6 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:pd/core/storage/preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -28,6 +30,11 @@ abstract final class NotificationChannels {
 class NotificationService {
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
+  final SharedPreferences? _prefs;
+
+  /// [prefs] enables caching of the exact-alarm grant state. Without it,
+  /// permission is never assumed and never requested implicitly.
+  NotificationService({SharedPreferences? prefs}) : _prefs = prefs;
 
   bool _initialized = false;
 
@@ -123,12 +130,22 @@ class NotificationService {
 
   Future<void> cancelAll() => _plugin.cancelAll();
 
-  /// Requests the exact-alarm permission (Android 12+). Returns true when
-  /// exact scheduling is allowed (always true on iOS / older Android).
-  Future<bool> requestExactAlarms() async {
+  /// Exact-alarm permission (Android 12+). With [prompt]=false (default)
+  /// returns only the cached grant — never navigates to system settings.
+  /// Pass [prompt]=true only from explicit in-app UI (Settings) so the
+  /// system screen never ambushes the user at startup or on save.
+  /// Always true on iOS / older Android.
+  Future<bool> requestExactAlarms({bool prompt = false}) async {
     final android = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
-    return await android?.requestExactAlarmsPermission() ?? true;
+    if (android == null) return true;
+    if (!prompt) {
+      return _prefs?.getBool(PrefKeys.exactAlarmsGranted) ?? false;
+    }
+    final granted =
+        await android.requestExactAlarmsPermission() ?? false;
+    await _prefs?.setBool(PrefKeys.exactAlarmsGranted, granted);
+    return granted;
   }
 
   /// Schedules a one-shot reminder. [exact]=false falls back to inexact

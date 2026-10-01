@@ -3654,6 +3654,18 @@ class $WaterRecordsTable extends WaterRecords
     requiredDuringInsert: false,
     defaultValue: const Constant(8),
   );
+  static const VerificationMeta _mlConsumedMeta = const VerificationMeta(
+    'mlConsumed',
+  );
+  @override
+  late final GeneratedColumn<int> mlConsumed = GeneratedColumn<int>(
+    'ml_consumed',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _wakeTimeMinutesMeta = const VerificationMeta(
     'wakeTimeMinutes',
   );
@@ -3685,6 +3697,7 @@ class $WaterRecordsTable extends WaterRecords
     cupsConsumed,
     cupSizeMl,
     goalCups,
+    mlConsumed,
     wakeTimeMinutes,
     sleepTimeMinutes,
   ];
@@ -3730,6 +3743,12 @@ class $WaterRecordsTable extends WaterRecords
       context.handle(
         _goalCupsMeta,
         goalCups.isAcceptableOrUnknown(data['goal_cups']!, _goalCupsMeta),
+      );
+    }
+    if (data.containsKey('ml_consumed')) {
+      context.handle(
+        _mlConsumedMeta,
+        mlConsumed.isAcceptableOrUnknown(data['ml_consumed']!, _mlConsumedMeta),
       );
     }
     if (data.containsKey('wake_time_minutes')) {
@@ -3779,6 +3798,10 @@ class $WaterRecordsTable extends WaterRecords
         DriftSqlType.int,
         data['${effectivePrefix}goal_cups'],
       )!,
+      mlConsumed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ml_consumed'],
+      )!,
       wakeTimeMinutes: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}wake_time_minutes'],
@@ -3802,6 +3825,7 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
   final int cupsConsumed;
   final int cupSizeMl;
   final int goalCups;
+  final int mlConsumed;
   final int wakeTimeMinutes;
   final int sleepTimeMinutes;
   const WaterRecord({
@@ -3810,6 +3834,7 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
     required this.cupsConsumed,
     required this.cupSizeMl,
     required this.goalCups,
+    required this.mlConsumed,
     required this.wakeTimeMinutes,
     required this.sleepTimeMinutes,
   });
@@ -3821,6 +3846,7 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
     map['cups_consumed'] = Variable<int>(cupsConsumed);
     map['cup_size_ml'] = Variable<int>(cupSizeMl);
     map['goal_cups'] = Variable<int>(goalCups);
+    map['ml_consumed'] = Variable<int>(mlConsumed);
     map['wake_time_minutes'] = Variable<int>(wakeTimeMinutes);
     map['sleep_time_minutes'] = Variable<int>(sleepTimeMinutes);
     return map;
@@ -3833,6 +3859,7 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
       cupsConsumed: Value(cupsConsumed),
       cupSizeMl: Value(cupSizeMl),
       goalCups: Value(goalCups),
+      mlConsumed: Value(mlConsumed),
       wakeTimeMinutes: Value(wakeTimeMinutes),
       sleepTimeMinutes: Value(sleepTimeMinutes),
     );
@@ -3849,6 +3876,7 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
       cupsConsumed: serializer.fromJson<int>(json['cupsConsumed']),
       cupSizeMl: serializer.fromJson<int>(json['cupSizeMl']),
       goalCups: serializer.fromJson<int>(json['goalCups']),
+      mlConsumed: serializer.fromJson<int>(json['mlConsumed']),
       wakeTimeMinutes: serializer.fromJson<int>(json['wakeTimeMinutes']),
       sleepTimeMinutes: serializer.fromJson<int>(json['sleepTimeMinutes']),
     );
@@ -3862,6 +3890,7 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
       'cupsConsumed': serializer.toJson<int>(cupsConsumed),
       'cupSizeMl': serializer.toJson<int>(cupSizeMl),
       'goalCups': serializer.toJson<int>(goalCups),
+      'mlConsumed': serializer.toJson<int>(mlConsumed),
       'wakeTimeMinutes': serializer.toJson<int>(wakeTimeMinutes),
       'sleepTimeMinutes': serializer.toJson<int>(sleepTimeMinutes),
     };
@@ -3873,6 +3902,7 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
     int? cupsConsumed,
     int? cupSizeMl,
     int? goalCups,
+    int? mlConsumed,
     int? wakeTimeMinutes,
     int? sleepTimeMinutes,
   }) => WaterRecord(
@@ -3881,6 +3911,7 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
     cupsConsumed: cupsConsumed ?? this.cupsConsumed,
     cupSizeMl: cupSizeMl ?? this.cupSizeMl,
     goalCups: goalCups ?? this.goalCups,
+    mlConsumed: mlConsumed ?? this.mlConsumed,
     wakeTimeMinutes: wakeTimeMinutes ?? this.wakeTimeMinutes,
     sleepTimeMinutes: sleepTimeMinutes ?? this.sleepTimeMinutes,
   );
@@ -3893,6 +3924,9 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
           : this.cupsConsumed,
       cupSizeMl: data.cupSizeMl.present ? data.cupSizeMl.value : this.cupSizeMl,
       goalCups: data.goalCups.present ? data.goalCups.value : this.goalCups,
+      mlConsumed: data.mlConsumed.present
+          ? data.mlConsumed.value
+          : this.mlConsumed,
       wakeTimeMinutes: data.wakeTimeMinutes.present
           ? data.wakeTimeMinutes.value
           : this.wakeTimeMinutes,
@@ -3910,6 +3944,7 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
           ..write('cupsConsumed: $cupsConsumed, ')
           ..write('cupSizeMl: $cupSizeMl, ')
           ..write('goalCups: $goalCups, ')
+          ..write('mlConsumed: $mlConsumed, ')
           ..write('wakeTimeMinutes: $wakeTimeMinutes, ')
           ..write('sleepTimeMinutes: $sleepTimeMinutes')
           ..write(')'))
@@ -3923,6 +3958,7 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
     cupsConsumed,
     cupSizeMl,
     goalCups,
+    mlConsumed,
     wakeTimeMinutes,
     sleepTimeMinutes,
   );
@@ -3935,6 +3971,7 @@ class WaterRecord extends DataClass implements Insertable<WaterRecord> {
           other.cupsConsumed == this.cupsConsumed &&
           other.cupSizeMl == this.cupSizeMl &&
           other.goalCups == this.goalCups &&
+          other.mlConsumed == this.mlConsumed &&
           other.wakeTimeMinutes == this.wakeTimeMinutes &&
           other.sleepTimeMinutes == this.sleepTimeMinutes);
 }
@@ -3945,6 +3982,7 @@ class WaterRecordsCompanion extends UpdateCompanion<WaterRecord> {
   final Value<int> cupsConsumed;
   final Value<int> cupSizeMl;
   final Value<int> goalCups;
+  final Value<int> mlConsumed;
   final Value<int> wakeTimeMinutes;
   final Value<int> sleepTimeMinutes;
   const WaterRecordsCompanion({
@@ -3953,6 +3991,7 @@ class WaterRecordsCompanion extends UpdateCompanion<WaterRecord> {
     this.cupsConsumed = const Value.absent(),
     this.cupSizeMl = const Value.absent(),
     this.goalCups = const Value.absent(),
+    this.mlConsumed = const Value.absent(),
     this.wakeTimeMinutes = const Value.absent(),
     this.sleepTimeMinutes = const Value.absent(),
   });
@@ -3962,6 +4001,7 @@ class WaterRecordsCompanion extends UpdateCompanion<WaterRecord> {
     this.cupsConsumed = const Value.absent(),
     this.cupSizeMl = const Value.absent(),
     this.goalCups = const Value.absent(),
+    this.mlConsumed = const Value.absent(),
     this.wakeTimeMinutes = const Value.absent(),
     this.sleepTimeMinutes = const Value.absent(),
   }) : date = Value(date);
@@ -3971,6 +4011,7 @@ class WaterRecordsCompanion extends UpdateCompanion<WaterRecord> {
     Expression<int>? cupsConsumed,
     Expression<int>? cupSizeMl,
     Expression<int>? goalCups,
+    Expression<int>? mlConsumed,
     Expression<int>? wakeTimeMinutes,
     Expression<int>? sleepTimeMinutes,
   }) {
@@ -3980,6 +4021,7 @@ class WaterRecordsCompanion extends UpdateCompanion<WaterRecord> {
       if (cupsConsumed != null) 'cups_consumed': cupsConsumed,
       if (cupSizeMl != null) 'cup_size_ml': cupSizeMl,
       if (goalCups != null) 'goal_cups': goalCups,
+      if (mlConsumed != null) 'ml_consumed': mlConsumed,
       if (wakeTimeMinutes != null) 'wake_time_minutes': wakeTimeMinutes,
       if (sleepTimeMinutes != null) 'sleep_time_minutes': sleepTimeMinutes,
     });
@@ -3991,6 +4033,7 @@ class WaterRecordsCompanion extends UpdateCompanion<WaterRecord> {
     Value<int>? cupsConsumed,
     Value<int>? cupSizeMl,
     Value<int>? goalCups,
+    Value<int>? mlConsumed,
     Value<int>? wakeTimeMinutes,
     Value<int>? sleepTimeMinutes,
   }) {
@@ -4000,6 +4043,7 @@ class WaterRecordsCompanion extends UpdateCompanion<WaterRecord> {
       cupsConsumed: cupsConsumed ?? this.cupsConsumed,
       cupSizeMl: cupSizeMl ?? this.cupSizeMl,
       goalCups: goalCups ?? this.goalCups,
+      mlConsumed: mlConsumed ?? this.mlConsumed,
       wakeTimeMinutes: wakeTimeMinutes ?? this.wakeTimeMinutes,
       sleepTimeMinutes: sleepTimeMinutes ?? this.sleepTimeMinutes,
     );
@@ -4023,6 +4067,9 @@ class WaterRecordsCompanion extends UpdateCompanion<WaterRecord> {
     if (goalCups.present) {
       map['goal_cups'] = Variable<int>(goalCups.value);
     }
+    if (mlConsumed.present) {
+      map['ml_consumed'] = Variable<int>(mlConsumed.value);
+    }
     if (wakeTimeMinutes.present) {
       map['wake_time_minutes'] = Variable<int>(wakeTimeMinutes.value);
     }
@@ -4040,6 +4087,7 @@ class WaterRecordsCompanion extends UpdateCompanion<WaterRecord> {
           ..write('cupsConsumed: $cupsConsumed, ')
           ..write('cupSizeMl: $cupSizeMl, ')
           ..write('goalCups: $goalCups, ')
+          ..write('mlConsumed: $mlConsumed, ')
           ..write('wakeTimeMinutes: $wakeTimeMinutes, ')
           ..write('sleepTimeMinutes: $sleepTimeMinutes')
           ..write(')'))
@@ -8235,6 +8283,7 @@ typedef $$WaterRecordsTableCreateCompanionBuilder =
       Value<int> cupsConsumed,
       Value<int> cupSizeMl,
       Value<int> goalCups,
+      Value<int> mlConsumed,
       Value<int> wakeTimeMinutes,
       Value<int> sleepTimeMinutes,
     });
@@ -8245,6 +8294,7 @@ typedef $$WaterRecordsTableUpdateCompanionBuilder =
       Value<int> cupsConsumed,
       Value<int> cupSizeMl,
       Value<int> goalCups,
+      Value<int> mlConsumed,
       Value<int> wakeTimeMinutes,
       Value<int> sleepTimeMinutes,
     });
@@ -8280,6 +8330,11 @@ class $$WaterRecordsTableFilterComposer
 
   ColumnFilters<int> get goalCups => $composableBuilder(
     column: $table.goalCups,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get mlConsumed => $composableBuilder(
+    column: $table.mlConsumed,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8328,6 +8383,11 @@ class $$WaterRecordsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get mlConsumed => $composableBuilder(
+    column: $table.mlConsumed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get wakeTimeMinutes => $composableBuilder(
     column: $table.wakeTimeMinutes,
     builder: (column) => ColumnOrderings(column),
@@ -8364,6 +8424,11 @@ class $$WaterRecordsTableAnnotationComposer
 
   GeneratedColumn<int> get goalCups =>
       $composableBuilder(column: $table.goalCups, builder: (column) => column);
+
+  GeneratedColumn<int> get mlConsumed => $composableBuilder(
+    column: $table.mlConsumed,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get wakeTimeMinutes => $composableBuilder(
     column: $table.wakeTimeMinutes,
@@ -8412,6 +8477,7 @@ class $$WaterRecordsTableTableManager
                 Value<int> cupsConsumed = const Value.absent(),
                 Value<int> cupSizeMl = const Value.absent(),
                 Value<int> goalCups = const Value.absent(),
+                Value<int> mlConsumed = const Value.absent(),
                 Value<int> wakeTimeMinutes = const Value.absent(),
                 Value<int> sleepTimeMinutes = const Value.absent(),
               }) => WaterRecordsCompanion(
@@ -8420,6 +8486,7 @@ class $$WaterRecordsTableTableManager
                 cupsConsumed: cupsConsumed,
                 cupSizeMl: cupSizeMl,
                 goalCups: goalCups,
+                mlConsumed: mlConsumed,
                 wakeTimeMinutes: wakeTimeMinutes,
                 sleepTimeMinutes: sleepTimeMinutes,
               ),
@@ -8430,6 +8497,7 @@ class $$WaterRecordsTableTableManager
                 Value<int> cupsConsumed = const Value.absent(),
                 Value<int> cupSizeMl = const Value.absent(),
                 Value<int> goalCups = const Value.absent(),
+                Value<int> mlConsumed = const Value.absent(),
                 Value<int> wakeTimeMinutes = const Value.absent(),
                 Value<int> sleepTimeMinutes = const Value.absent(),
               }) => WaterRecordsCompanion.insert(
@@ -8438,6 +8506,7 @@ class $$WaterRecordsTableTableManager
                 cupsConsumed: cupsConsumed,
                 cupSizeMl: cupSizeMl,
                 goalCups: goalCups,
+                mlConsumed: mlConsumed,
                 wakeTimeMinutes: wakeTimeMinutes,
                 sleepTimeMinutes: sleepTimeMinutes,
               ),

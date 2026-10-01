@@ -6,6 +6,7 @@ import 'package:pd/features/prayer/presentation/screens/prayer_dashboard_screen.
 import 'package:pd/features/settings/presentation/screens/settings_screen.dart';
 import 'package:pd/features/todo/presentation/screens/todo_detail_screen.dart';
 import 'package:pd/features/todo/presentation/screens/todo_home_screen.dart';
+import 'package:pd/features/water/presentation/screens/water_home_screen.dart';
 
 /// App navigation. Bottom tabs: Home + Settings.
 /// Feature modules are pushed as full-screen routes; in Phase 1 they render
@@ -64,10 +65,7 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/water',
-      builder: (context, state) => const PlaceholderScreen(
-        title: 'Water Tracker',
-        message: 'The Water tracker lands in Phase 4.',
-      ),
+      builder: (context, state) => const WaterHomeScreen(),
     ),
     GoRoute(
       path: '/pomodoro',

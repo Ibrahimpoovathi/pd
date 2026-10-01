@@ -11,6 +11,8 @@ import 'package:pd/features/prayer/data/prayer_repository.dart';
 import 'package:pd/features/prayer/domain/prayer_models.dart';
 import 'package:pd/features/todo/data/todo_notifications.dart';
 import 'package:pd/features/todo/data/todo_repository.dart';
+import 'package:pd/features/water/data/water_notifications.dart';
+import 'package:pd/features/water/data/water_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
@@ -18,7 +20,7 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final database = AppDatabase();
-  final notifications = NotificationService();
+  final notifications = NotificationService(prefs: prefs);
   await notifications.init(
     onTap: (payload) async {
       final todoId = TodoNotifications.todoIdFromPayload(payload);
@@ -40,6 +42,10 @@ Future<void> main() async {
   final prayerSettings = await PrayerRepository(database).getSettings();
   await PrayerNotifications(notifications)
       .reschedule(settings: prayerSettings, now: DateTime.now());
+
+  // Re-arm water reminders between wake and sleep.
+  await WaterNotifications(notifications)
+      .reschedule(WaterRepository(database, prefs));
 
   runApp(
     ProviderScope(

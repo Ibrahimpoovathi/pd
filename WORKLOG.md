@@ -283,3 +283,17 @@ Append-only log of what was done each session.
 ### Test lessons added
 - `todayPrayerTimesProvider.overrideWith` for deterministic time tests.
 - Month-boundary: never seed relative dates in grid tests.
+
+## 2026-10-01 — Phase 4: Water tracker (done, verified)
+
+### Features
+- Home: progress ring with 250ml/500ml/custom/undo quick-adds, 7-day bar history, streak banner.
+- Settings sheet: goal cups, cup size, wake/sleep times, reminder interval, master toggle.
+- Smart reminders: interval alerts only between wake/sleep; exact/inexact by permission; re-armed at startup.
+- Scoring: 15 pts when goal met (+2/day streak), 0 otherwise; streak = consecutive goal-met days (snapshot goals).
+- `mlConsumed` column added, backfilled from cups*size; settings live in prefs.
+
+### Verification
+- 5 unit tests (slots logic, addMl accumulate/clamp, scoring with streak, streak break, repo settings CRUD).
+- `flutter analyze` clean. Release on `pixel_7`: clean install, first frame **1.5s**, zero crashes.
+- Staged `releases/pd-phase4-water-release.apk` (66.6MB) + refreshed `pd-latest-release.apk` (identical sha1).
