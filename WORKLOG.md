@@ -253,3 +253,33 @@ Append-only log of what was done each session.
 - Staged `releases/pd-phase3-prayer-release.apk` + `pd-latest-release.apk`
   (sha1-identical to tested build). NOTE: release signature differs from
   debug — phone must uninstall any debug build first (data wiped).
+
+## 2026-10-01 — Phase 3 follow-ups: time-gating + history/PDF (done, verified)
+
+### Time-gating (no future marking)
+- `prayerStarted(now, time?)`: markable iff time started or unknown.
+  Locked cards dimmed; tap shows "X can be marked once H:MM AM" snackbar.
+  Qada unaffected (always after its time). Help sheet documents the rule.
+
+### History + PDF export
+- 4th dashboard tab: month grid (12 back) with green/orange/red dots,
+  tap → day detail (record + recomputed score). Export button → sheet with
+  30/90/365 presets + custom range (capped 366 days).
+- PDF: landscape A4 spreadsheet table (Date + 5 prayers + Tahajjud/Duha/
+  Waqiah/Mulk/Adhkar + Score), month subheaders + totals, legend page header.
+  Cell codes WinAnsi-safe: Dingbats check for ada, Q/- + j/m suffixes.
+  Shared via system sheet (`printing`), no storage permission.
+- ScoreService: extracted `prayerScoreOn(date)` (raw + streak, capped) reused
+  by history, PDF, and `recordPrayerDay`.
+- New packages: `pdf`, `printing` (+2MB APK: 64.3 → 66.5MB, still <100MB).
+
+### Verification
+- 12 new tests (gating unit+widget with provider time overrides, cell codes,
+  status mapping, range query, PDF bytes, history tab flow). Total suite green.
+- Release on `pixel_7`: clean install, first frame 4.1s, no crashes.
+- Staged `releases/pd-phase3-prayer-release.apk` (66.5MB) + `pd-latest`.
+- Month-boundary test flake fixed (seed the 1st, not "yesterday").
+
+### Test lessons added
+- `todayPrayerTimesProvider.overrideWith` for deterministic time tests.
+- Month-boundary: never seed relative dates in grid tests.

@@ -49,6 +49,19 @@ class PrayerRepository {
         .getSingleOrNull();
   }
 
+  /// All records in [from]..[to] inclusive, oldest first. Unbounded past
+  /// is fine — callers cap the range (history view: 12 months max).
+  Future<List<PrayerRecord>> recordsBetween(DateTime from, DateTime to) {
+    final start = dateOnly(from);
+    final endExclusive = dateOnly(to).add(const Duration(days: 1));
+    return (_db.select(_db.prayerRecords)
+          ..where((t) =>
+              t.date.isBiggerOrEqualValue(start) &
+              t.date.isSmallerThanValue(endExclusive))
+          ..orderBy([(t) => OrderingTerm.asc(t.date)]))
+        .get();
+  }
+
   /// Writes the given fields for [id] (only non-absent values change).
   Future<void> updateRecord(int id, PrayerRecordsCompanion entry) {
     return (_db.update(_db.prayerRecords)..where((t) => t.id.equals(id)))

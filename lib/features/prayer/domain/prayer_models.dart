@@ -1,5 +1,10 @@
 import 'package:pd/core/storage/database.dart';
 
+/// A prayer becomes markable once its start time arrives.
+/// Null [prayerTime] (unknown location) means always markable.
+bool prayerStarted(DateTime now, DateTime? prayerTime) =>
+    prayerTime == null || !now.isBefore(prayerTime);
+
 /// The five daily fard prayers.
 enum PrayerName { fajr, dhuhr, asr, maghrib, isha }
 

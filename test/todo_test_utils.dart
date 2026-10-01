@@ -80,12 +80,15 @@ class TodoTestEnv {
 
   Future<void> tearDown() => db.close();
 
-  Widget scope(Widget child) {
+  // NB: Riverpod 3 does not publicly export the Override type, so extras
+  // are dynamic (type-checked against ProviderScope's parameter at use).
+  Widget scope(Widget child, {List<dynamic> extra = const []}) {
     return ProviderScope(
       overrides: [
         prefsProvider.overrideWithValue(prefs),
         databaseProvider.overrideWithValue(db),
         notificationServiceProvider.overrideWithValue(notifications),
+        ...extra,
       ],
       child: MaterialApp(home: child),
     );

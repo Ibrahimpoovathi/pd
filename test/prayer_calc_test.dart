@@ -111,6 +111,18 @@ void main() {
     });
   });
 
+  group('prayerStarted', () {
+    test('before/at/after/null', () {
+      final t = DateTime(2026, 5, 1, 12, 0);
+      expect(prayerStarted(t.subtract(const Duration(minutes: 1)), t),
+          isFalse);
+      expect(prayerStarted(t, t), isTrue);
+      expect(
+          prayerStarted(t.add(const Duration(minutes: 1)), t), isTrue);
+      expect(prayerStarted(t, null), isTrue);
+    });
+  });
+
   group('PrayerNameX', () {
     test('payload round-trip + notification ids unique', () {
       final ids = PrayerName.values.map((p) => p.notificationId).toSet();

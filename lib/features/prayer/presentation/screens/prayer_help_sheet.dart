@@ -48,6 +48,7 @@ class PrayerHelpSheet extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               'Tap anywhere on a prayer row to mark it — no need to aim for the checkbox. '
+              'A prayer unlocks only once its time starts; earlier taps tell you when it begins. '
               'Streak: only days where all five are Ada continue it; a miss or any Qada resets it to zero.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),

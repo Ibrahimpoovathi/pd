@@ -50,6 +50,20 @@ final prayerStreakProvider = FutureProvider<int>((ref) async {
   return repo.fardStreak(today);
 });
 
+/// Records of one calendar month ([month] = any day within it).
+final monthRecordsProvider =
+    FutureProvider.family<List<PrayerRecord>, DateTime>((ref, month) async {
+  final start = DateTime(month.year, month.month);
+  final end = DateTime(month.year, month.month + 1, 0);
+  return ref.watch(prayerRepositoryProvider).recordsBetween(start, end);
+});
+
+/// Recomputed prayer-section score for an arbitrary [date].
+final historyDayScoreProvider =
+    FutureProvider.family<int, DateTime>((ref, date) async {
+  return ref.watch(scoreServiceProvider).prayerScoreOn(date);
+});
+
 /// Writes record fields, then refreshes prayer scoring + notifications.
 Future<void> savePrayerRecord(
   WidgetRef ref,

@@ -65,6 +65,8 @@ class PrayersTab extends ConsumerWidget {
                         prayer: p,
                         time: t?.timeOf(p),
                         record: rec,
+                        markable: prayerStarted(
+                            DateTime.now(), t?.timeOf(p)),
                       ),
                   ],
                 );
@@ -123,35 +125,44 @@ class _PrayerCard extends ConsumerWidget {
   final PrayerName prayer;
   final DateTime? time;
   final PrayerRecord record;
+  final bool markable;
 
   const _PrayerCard({
     required this.prayer,
     required this.time,
     required this.record,
+    required this.markable,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prayed = record.prayed(prayer);
     final isQada = record.qada(prayer);
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        // Whole card toggles: big touch target, no precise checkbox aim.
-        onTap: () => _setPrayed(ref, !prayed),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Transform.scale(
-                    scale: 1.25,
-                    child: Checkbox(
-                      value: prayed,
-                      onChanged: (_) => _setPrayed(ref, !prayed),
+    return Opacity(
+      opacity: markable ? 1.0 : 0.55,
+      child: Card(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          // Whole card toggles: big touch target, no precise checkbox aim.
+          // Locked until the prayer time starts.
+          onTap: () => markable
+              ? _setPrayed(ref, !prayed)
+              : _lockedHint(context),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Transform.scale(
+                      scale: 1.25,
+                      child: Checkbox(
+                        value: prayed,
+                        onChanged: markable
+                            ? (_) => _setPrayed(ref, !prayed)
+                            : null,
+                      ),
                     ),
-                  ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,6 +216,19 @@ class _PrayerCard extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    ),
+  );
+  }
+
+  void _lockedHint(BuildContext context) {
+    final when = time == null
+        ? 'its time starts'
+        : DateFormat('h:mm a').format(time!);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${prayer.label} can be marked once $when.'),
+        duration: const Duration(seconds: 2),
       ),
     );
   }

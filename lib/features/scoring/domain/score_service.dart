@@ -89,6 +89,23 @@ class ScoreService {
   Future<void> recordPrayerDay(DateTime date, {DateTime? now}) async {
     final day = _day(date);
     final today = _day(now ?? DateTime.now());
+    final points = await prayerScoreOn(day);
+
+    final row = await _getOrCreate(today);
+    // Prayer points belong to their own day; only today's row is live.
+    if (isSameDay(day, today)) {
+      await (_db.update(_db.dailyScores)..where((t) => t.id.equals(row.id)))
+          .write(DailyScoresCompanion(
+              prayerScore: Value(points.clamp(0, ScoreSectionCaps.prayer))));
+      await recalcToday(today);
+    }
+  }
+
+  /// Full prayer-section points for [day]: raw record points + the streak
+  /// bonus earned going into that day, clamped to the section cap.
+  /// Pure read — reused by history views and PDF export.
+  Future<int> prayerScoreOn(DateTime date) async {
+    final day = _day(date);
     final record = await (_db.select(_db.prayerRecords)
           ..where((t) => t.date.equals(day)))
         .getSingleOrNull();
@@ -120,17 +137,7 @@ class ScoreService {
       points += (streak * ScorePoints.prayerStreakBonusPerDay)
           .clamp(0, ScorePoints.prayerStreakBonusCap);
     }
-
-    final row = await _getOrCreate(today);
-    // Prayer points belong to their own day; only today's row is live.
-    // (Past days keep history in prayer_records; section history rebuilds
-    // fully in Phase 7.)
-    if (isSameDay(day, today)) {
-      await (_db.update(_db.dailyScores)..where((t) => t.id.equals(row.id)))
-          .write(DailyScoresCompanion(
-              prayerScore: Value(points.clamp(0, ScoreSectionCaps.prayer))));
-      await recalcToday(today);
-    }
+    return points.clamp(0, ScoreSectionCaps.prayer);
   }
 
   static int _dhikrPoints(bool done, int count) {

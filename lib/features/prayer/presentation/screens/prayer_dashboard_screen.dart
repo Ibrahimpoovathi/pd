@@ -5,6 +5,7 @@ import 'package:pd/core/storage/preferences.dart';
 import 'package:pd/core/theme/theme_provider.dart';
 import 'package:pd/features/prayer/presentation/screens/extra_ibadah_tab.dart';
 import 'package:pd/features/prayer/presentation/screens/prayer_help_sheet.dart';
+import 'package:pd/features/prayer/presentation/screens/prayer_history_tab.dart';
 import 'package:pd/features/prayer/presentation/screens/prayer_settings_tab.dart';
 import 'package:pd/features/prayer/presentation/screens/prayers_tab.dart';
 
@@ -42,14 +43,16 @@ class PrayerDashboardScreen extends ConsumerWidget {
       );
     }
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Prayer Tracker'),
           bottom: const TabBar(
+            isScrollable: true,
             tabs: [
               Tab(text: 'Prayers'),
               Tab(text: 'Extra'),
+              Tab(text: 'History'),
               Tab(text: 'Settings'),
             ],
           ),
@@ -58,6 +61,7 @@ class PrayerDashboardScreen extends ConsumerWidget {
           children: [
             PrayersTab(),
             ExtraIbadahTab(),
+            PrayerHistoryTab(),
             PrayerSettingsTab(),
           ],
         ),
