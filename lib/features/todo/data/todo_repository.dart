@@ -28,6 +28,66 @@ class TodoRepository {
         .getSingleOrNull();
   }
 
+  /// Incomplete, non-trashed tasks for the Pomodoro task picker.
+  /// Sorted: due today first, then tomorrow, then undated (recent first).
+  Future<List<Todo>> getTasksForPomodoroPicker() async {
+    final rows = await (_db.select(_db.todos)
+          ..where((t) => t.isCompleted.equals(false)))
+        .get();
+    final today = dateOnly(DateTime.now());
+    final tomorrow = today.add(const Duration(days: 1));
+    int rank(Todo t) {
+      if (t.dueDate == null) return 2;
+      final d = dateOnly(t.dueDate!);
+      if (d == today) return 0;
+      if (d == tomorrow) return 1;
+      if (d.isBefore(today)) return 0; // overdue first
+      return 2;
+    }
+
+    rows.sort((a, b) {
+      final ra = rank(a);
+      final rb = rank(b);
+      if (ra != rb) return ra.compareTo(rb);
+      final da = a.dueDate;
+      final db = b.dueDate;
+      if (da != null && db != null) return da.compareTo(db);
+      if (da != null) return -1;
+      if (db != null) return 1;
+      return b.id.compareTo(a.id); // recent first
+    });
+    return rows;
+  }
+
+  /// Increments the Pomodoro focus-session counter metadata on a task.
+  /// Stores count in the task's notes field suffix `[pomodoro:N]` for
+  /// "Where focus went" stats without a schema change.
+  Future<void> recordPomodoroSession(int id) async {
+    final todo = await getById(id);
+    if (todo == null) return;
+    final current = _pomodoroCount(todo.description);
+    final base = _stripPomodoroTag(todo.description);
+    final tag = '[pomodoro:${current + 1}]';
+    final notes = base.isEmpty ? tag : '$base $tag';
+    await (_db.update(_db.todos)..where((t) => t.id.equals(id))).write(
+      TodosCompanion(
+        description: Value(notes),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  static int _pomodoroCount(String? description) {
+    if (description == null) return 0;
+    final m = RegExp(r'\[pomodoro:(\d+)\]').firstMatch(description);
+    return m == null ? 0 : int.tryParse(m.group(1) ?? '0') ?? 0;
+  }
+
+  static String _stripPomodoroTag(String? description) {
+    if (description == null) return '';
+    return description.replaceAll(RegExp(r'\s*\[pomodoro:\d+\]'), '').trim();
+  }
+
   Stream<Todo?> watchById(int id) {
     return (_db.select(_db.todos)..where((t) => t.id.equals(id)))
         .watchSingleOrNull();

@@ -6,6 +6,8 @@ import 'package:pd/app/router.dart';
 import 'package:pd/core/notifications/notification_service.dart';
 import 'package:pd/core/storage/database.dart';
 import 'package:pd/core/storage/preferences.dart';
+import 'package:pd/features/pomodoro/data/pomodoro_notifications.dart';
+import 'package:pd/features/pomodoro/data/pomodoro_repository.dart';
 import 'package:pd/features/prayer/data/prayer_notifications.dart';
 import 'package:pd/features/prayer/data/prayer_repository.dart';
 import 'package:pd/features/prayer/domain/prayer_models.dart';
@@ -46,6 +48,10 @@ Future<void> main() async {
   // Re-arm water reminders between wake and sleep.
   await WaterNotifications(notifications)
       .reschedule(WaterRepository(database, prefs));
+
+  // Re-arm Pomodoro reminders.
+  await PomodoroNotifications(notifications)
+      .reschedule(PomodoroRepository(database));
 
   runApp(
     ProviderScope(

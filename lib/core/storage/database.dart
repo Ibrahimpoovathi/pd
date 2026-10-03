@@ -147,6 +147,7 @@ class PomodoroSessions extends Table {
 }
 
 class PomodoroPresets extends Table {
+  IntColumn get totalCycles => integer().withDefault(const Constant(4))();
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
   IntColumn get workMinutes => integer()();
@@ -224,7 +225,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -242,6 +243,12 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(prayerRecords, prayerRecords.ishaQada);
           }
           if (from < 4) {
+          if (from < 5) {
+            await m.addColumn(pomodoroPresets, pomodoroPresets.totalCycles);
+            await m.database.customStatement(
+              'UPDATE pomodoro_presets SET total_cycles = 4 WHERE total_cycles IS NULL OR total_cycles = 0',
+            );
+          }
             await m.addColumn(waterRecords, waterRecords.mlConsumed);
             await m.database.customStatement(
               'UPDATE water_records SET ml_consumed = cups_consumed * cup_size_ml',

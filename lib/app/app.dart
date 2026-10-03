@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pd/app/router.dart';
-import 'package:pd/core/theme/app_theme.dart';
 import 'package:pd/core/theme/theme_provider.dart';
 
 class PdApp extends ConsumerWidget {
@@ -9,13 +8,13 @@ class PdApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
+    final variant = ref.watch(appThemeVariantProvider);
     return MaterialApp.router(
       title: 'PD — Personal Development',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
-      themeMode: themeMode,
+      theme: appThemeFor(variant),
+      darkTheme: appThemeFor(variant),
+      themeMode: ThemeMode.light,
       routerConfig: router,
     );
   }

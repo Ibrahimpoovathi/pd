@@ -28,6 +28,14 @@ abstract final class PrefKeys {
   // To-do trash auto-clear (days to keep, 0 = manual only).
   static const todoTrashKeepDays = 'todo_trash_keep_days';
 
+  // Pomodoro settings
+  static const pomodoroWorkMinutes = 'pomodoro_work_minutes';
+  static const pomodoroShortBreakMinutes = 'pomodoro_short_break_minutes';
+  static const pomodoroLongBreakMinutes = 'pomodoro_long_break_minutes';
+  static const pomodoroTotalCycles = 'pomodoro_total_cycles';
+  static const pomodoroChimeEnabled = 'pomodoro_chime_enabled';
+  static const pomodoroVibrationEnabled = 'pomodoro_vibration_enabled';
+
   // Exact-alarm permission state (cached; only prompt with in-app context).
   static const exactAlarmsGranted = 'exact_alarms_granted';
 }

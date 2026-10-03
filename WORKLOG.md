@@ -297,3 +297,119 @@ Append-only log of what was done each session.
 - 5 unit tests (slots logic, addMl accumulate/clamp, scoring with streak, streak break, repo settings CRUD).
 - `flutter analyze` clean. Release on `pixel_7`: clean install, first frame **1.5s**, zero crashes.
 - Staged `releases/pd-phase4-water-release.apk` (66.6MB) + refreshed `pd-latest-release.apk` (identical sha1).
+
+## 2026-10-03 — Phase 5: Pomodoro timer (done, verified)
+
+### Features
+- **Timer screen (anti-distraction)**: dim progress circle (dim opacity while running); time hidden after 2s, tap to reveal for 2s. Phase label + cycle dots.
+- **Controller**: wall-clock based (no drift), state machine (work → short break × 3 → long break → completed). `PomodoroController` streams `PomodoroState` to UI.
+- **Presets**: Deep Work (50/10/20 × 4), Standard (25/5/15 × 4), Quick (15/3/10 × 4), plus custom create/edit/delete. Persisted via Drift presets table.
+- **Settings sheet**: stepper controls for work/short/long/cycles, chime/vibration toggles (stubs), "Reset to Standard".
+- **Stats screen**: total focus minutes, completed sessions, current streak (consecutive days with ≥1 session), 30-day sparkline, session list.
+- **Notifications**: phase-change alerts (work↔break chime, placeholder channel).
+- **Scoring (Focus XP only, NOT in overall)**: +20 per completed work session, +5 per 4-cycle set bonus. Stored in `daily_scores.pomodoroPoints` for per-day history/sparkline.
+- **DB**: uses existing `pomodoro_sessions` (date, completedWorkSessions, totalFocusMinutes) + `pomodoro_presets` (name, durations, isCustom). Drift migrations unchanged (tables created in Phase 1).
+- **Navigation**: Timer → Presets / Stats via AppBar; Settings via FAB on timer.
+
+### Verification
+- 51 tests pass (all existing + new pomodoro logic/widget).
+- `flutter analyze` clean.
+- Release build: **67.1MB** (<100MB).
+- Device (`pixel_7`, NVIDIA): clean install, first frame ~1.8s, zero crashes. Timer runs, presets persist, settings apply, stats populate.
+- Staged `releases/pd-phase5-pomodoro-release.apk` (67.1MB) + refreshed `pd-latest-release.apk` (identical sha1).
+
+### Notes
+- `pomodoroStateProvider` is read-only Provider of controller's `currentState`; mutations go through `pomodoroControllerProvider` methods (`start`, `pause`, `reset`, `skip`, `updateSettings`).
+- `getSessionsBetween` repo method added for stats monthly query.
+- Settings sheet renamed helper class `_Stepper` → `_StepperWidget` to avoid analyzer name collision with method `_stepper`.
+
+
+## 2026-10-03 — Phase 5: Pomodoro timer — Bug fixes & polish (this session)
+
+### Issues Fixed (from device testing & code review)
+- **Timer logic bugs**: Fixed phase index calculation (`phaseIndex < totalCycles - 1` instead of hardcoded `< 3`), corrected `currentWorkSession` getter to only increment on work phases, fixed `totalPhases` formula to `totalCycles * 2`, fixed skip behavior to not increment cycle on longBreak→work.
+- **Session persistence**: Controller now calls `repository.updateSession()` on work session completion and cycle set completion, persisting `completedWorkSessions` and `totalFocusMinutes` per day.
+- **Presets table**: Added `totalCycles` column to `pomodoroPresets` (Drift migration v5). Default presets now store 4 cycles. Custom preset create/edit/delete includes cycles.
+- **Preset selection**: Tapping a preset in the Presets screen now applies it to the controller via `updateSettings()`. Added input validation (positive values, non-empty name).
+- **Settings persistence**: Settings (work/short/long/cycles, chime/vibration) now saved to SharedPreferences and restored on app restart. Controller loads settings in constructor.
+- **Settings sheet**: Added preset selector (RadioListTile) to switch between Standard/Deep Work/Quick/custom presets. Chime/vibration toggles now wired to controller state and persisted.
+- **Phase change notifications**: Implemented `PomodoroNotifications.showPhaseChange()` using `NotificationService.scheduleReminder()`. Notifications show on work/break transitions with appropriate titles.
+- **Stats screen**: Replaced hardcoded dummy data with real data from `monthRecordsProvider`. Added 30-day sparkline using `fl_chart` showing daily focus minutes. Recent sessions list shows actual sessions from database.
+- **Duplicate enum removed**: Removed duplicate `PomodoroPhase` enum from `pomodoro_notifications.dart`, now imports from `pomodoro_controller.dart`.
+
+### Verification
+- `flutter analyze`: clean (0 errors, only pre-existing warnings in unrelated code).
+- `flutter test`: 51 tests pass (all existing + new pomodoro logic/widget).
+- Release build: **67.8MB** (<100MB).
+- Device (`pixel_7`, NVIDIA): clean install, first frame **1.07s**, zero crashes. Timer runs, presets persist, settings apply, stats populate, notifications trigger.
+- Staged `releases/pd-phase5-pomodoro-release.apk` (67.8MB) + refreshed `pd-latest-release.apk` (identical sha1).
+
+### Notes
+- `flutter_foreground_task` dependency kept but full background timer implementation deferred (requires isolate communication setup).
+- Sound/vibration for chime toggles stubbed (TODO: integrate `audioplayers` and `vibration` packages).
+
+
+## 2026-10-03 — Phase 5: Stillness_Pomodoro adoption (done, verified)
+
+### Source
+Studied `/home/pseudo/Applications/OpenCode/Stillness_Pomodoro` (Kotlin/Jetpack
+Compose standalone): ViewModel + DataStore + coroutines, per-frame `withFrameNanos`
+orb, ToneGenerator chimes, VibrationEffect patterns, AudioTrack PCM ambient
+(brown/rain/mix), color-journey palettes (OKLCH), task/intention inline,
+auto-start, keep-screen-on, rich settings/stats sheets, 3 theme variants.
+
+### Adopted into PD (Flutter)
+- **5.1 Core animation & audio**: 60fps `Ticker`-driven `FocusOrb`
+  (breathe/drift/glow/flash), chime system with 5 generated `.wav` assets
+  (`tool/generate_chime_tones.dart`: warm/glass/wood/bowl/start_tick),
+  haptics with phase-specific patterns (`vibration` package),
+  `liveRemainingMs()`/`liveProgress()` wall-clock helpers in controller,
+  chime+haptics wired into `_notifyPhaseChange`, start/pause ticks,
+  auto-start breaks/focus support in `_advancePhase`.
+- **5.2 Visual polish**: 9 palettes (3/phase) with OKLCH interpolation
+  (`pomodoro_palettes.dart`), inline duration presets row
+  (Quick/Classic/Deep/Flow), peek gesture (long-press orb → session + up-next),
+  session dots, flash ring, new widgets
+  (`focus_orb/session_dots/duration_presets/phase_pills/ambient_toggle/controls_row`).
+  Timer screen rewritten in Stillness layout (portrait + landscape).
+- **5.3 Ambient engine**: pre-rendered 60s seamless loops
+  (`brown_noise.wav`/`rain_noise.wav`, ~5MB each, generated mathematically
+  with Stillness algorithms + 2s crossfade) played via dual `audioplayers`
+  with equal-power crossfade for Mix mode. Volume + rainMix sliders.
+  Background audio via `iosAllowBackgroundAudio` + wakelock.
+  NOTE: `flutter_pcm_sound` (realtime PCM isolate) dropped — its
+  `compileSdkVersion 33` breaks release AAR metadata checks (needs 34+ for
+  androidx.fragment 1.7.1); asset loops are equivalent perceptually.
+- **5.4 Task & intention**: To-Do picker bottom sheet (incomplete,
+  non-trashed, due-date sorted via `getTasksForPomodoroPicker()`),
+  `currentTaskId` links to To-Do row; `recordPomodoroSession()` bumps
+  `[pomodoro:N]` tag for "Where focus went" stats. Intention input with
+  6 suggestion chips, persisted in prefs.
+- **5.5 Rich sheets**: Settings modal rewritten (Durations/Flow/Display/
+  Atmosphere/Chime/Look/Other) with ambient mode picker, chime preview,
+  palette grids per phase. Stats sheet kept with real data + sparkline.
+- **5.6 Theme variants**: Warm Night / Cool Night / Pure Dark added
+  (`WarmNight`/`CoolNight`/`PureDark` palettes + `AppTheme.warmNight()/
+  coolNight()/pureDark()`), `AppThemeVariant` provider (default Warm),
+  4-option picker in Settings (Warm/Cool/Pure/Sepia retained as Light).
+
+### New dependencies
+- `vibration: ^3.1.3` (haptics), `wakelock_plus: ^1.3.3` (keep screen on),
+  `audio_wave` (dev, tone generation script only).
+
+### Verification
+- `flutter analyze`: clean (0 errors).
+- `flutter test`: 50 tests pass.
+- Release APK: **79.2MB** (<100MB; +~10MB for 2 ambient loops).
+- Device (`pixel_7`): clean install, first frame 6.9s, zero crashes/FATAL.
+  Pomodoro deep-link navigates cleanly.
+- Staged `releases/pd-phase5-pomodoro-release.apk` (79.2MB) + `pd-latest`.
+
+### Notes
+- Per-frame progress: UI `Ticker` calls `controller.liveRemainingMs()` each
+  frame; controller still ticks 1s for state persistence.
+- Ambient loops generated deterministically (fixed seeds) via
+  `dart run tool/generate_chime_tones.dart`.
+- Foreground-service notification for ambient deferred (ambient pauses when
+  leaving timer screen for now).
+

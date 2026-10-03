@@ -6,17 +6,13 @@ system. Local-first and private by design: all data stays in on-device SQLite.
 
 ## Status
 
-**Phase 1 (foundation) complete.** App shell with bottom navigation (Home + Settings),
-GitHub Dark / Sepia Light themes, Drift database schema for all modules,
-notification infrastructure, and placeholder routes for upcoming modules.
-
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Foundation: scaffold, themes, DB schema, shell, docs | Done |
 | 2 | To-Do (tabs, reminders, trash, auto-clear) | Done |
 | 3 | Muslim tracker (prayer calc + override + reset, ibadah) | Done |
-| 4 | Water tracker (ring, smart reminders, history) | Planned |
-| 5 | Pomodoro (dim circle, hidden time, background, chime) | Planned |
+| 4 | Water tracker (ring, smart reminders, history) | Done |
+| 5 | Pomodoro (dim circle, hidden time, background, chime) | Done |
 | 6 | Screen time (usage tracking, limits, focus mode) | Planned |
 | 7 | Scoring dashboard, export/import, polish | Planned |
 
@@ -69,6 +65,7 @@ releases/pd-latest-release.apk          # always the newest build (grab this)
 releases/pd-phase2-todo-debug.apk       # Phase 2: To-Do module
 releases/pd-phase3-prayer-release.apk   # Phase 3: Muslim tracker + UX pack
 releases/pd-phase4-water-release.apk    # Phase 4: Water tracker
+releases/pd-phase5-pomodoro-release.apk # Phase 5: Pomodoro timer
 ```
 
 1. Copy the APK to your phone (USB, file share, QR — any method).
@@ -89,3 +86,21 @@ flutter run
 ```
 
 Key decisions and day-to-day progress are logged in [WORKLOG.md](WORKLOG.md).
+
+## External releases (GitHub 100MB limit)
+
+Release APKs are **not committed to git**. They live in a local staging folder:
+
+```
+/home/pseudo/Applications/OpenCode/pd-releases/
+  pd-latest-release.apk          # symlink to newest
+  pd-phase2-todo-debug.apk
+  pd-phase3-prayer-release.apk
+  pd-phase4-water-release.apk
+  pd-phase5-pomodoro-release.apk
+```
+
+`.gitignore` excludes `releases/`. Git history was purged of APKs via
+`git-filter-repo` (current `.git` ~776KB). Signing uses `~/.android/pd-release.keystore`
+(outside repo) + `android/key.properties` (gitignored).
+

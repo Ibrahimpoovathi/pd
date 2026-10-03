@@ -9,7 +9,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
+    final variant = ref.watch(appThemeVariantProvider);
     final modules = ref.watch(modulesProvider);
 
     return Scaffold(
@@ -17,20 +17,28 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         children: [
           _sectionHeader(context, 'Appearance'),
-          SegmentedButton<ThemeMode>(
-            segments: const [
-              ButtonSegment(value: ThemeMode.system, label: Text('System')),
-              ButtonSegment(value: ThemeMode.dark, label: Text('Dark')),
-              ButtonSegment(value: ThemeMode.light, label: Text('Light')),
-            ],
-            selected: {themeMode},
-            onSelectionChanged: (modes) =>
-                ref.read(themeModeProvider.notifier).setMode(modes.first),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final v in AppThemeVariant.values)
+                  ChoiceChip(
+                    label: Text(_variantLabel(v)),
+                    selected: variant == v,
+                    onSelected: (_) => ref
+                        .read(appThemeVariantProvider.notifier)
+                        .setVariant(v),
+                  ),
+              ],
+            ),
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Text(
-              'Dark = GitHub Dark. Light = warm sepia, easy on the eyes.',
+              'Warm/Cool/Pure = Stillness-inspired dark themes. '
+              'Sepia = warm light theme, easy on the eyes.',
             ),
           ),
           _sectionHeader(context, 'Modules'),
@@ -97,6 +105,19 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _variantLabel(AppThemeVariant v) {
+    switch (v) {
+      case AppThemeVariant.warmNight:
+        return 'Warm';
+      case AppThemeVariant.coolNight:
+        return 'Cool';
+      case AppThemeVariant.pureDark:
+        return 'Pure';
+      case AppThemeVariant.sepiaLight:
+        return 'Sepia';
+    }
   }
 
   Widget _sectionHeader(BuildContext context, String title) {

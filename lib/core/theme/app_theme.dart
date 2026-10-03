@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pd/core/constants/colors.dart';
 
-/// Builds the [ThemeData] for GitHub Dark and Sepia Light themes.
+/// Builds the [ThemeData] for GitHub Dark, Sepia Light,
+/// and Stillness-inspired Warm/Cool/Pure night variants.
 abstract final class AppTheme {
   static ThemeData dark() {
     final scheme = ColorScheme.dark(
@@ -35,6 +36,60 @@ abstract final class AppTheme {
     );
     return _build(scheme, SepiaLight.background, SepiaLight.surfaceElevated,
         SepiaLight.textPrimary, SepiaLight.textSecondary, SepiaLight.border);
+  }
+
+  /// Warm Night: GitHub Dark base with warm ember accent.
+  static ThemeData warmNight() {
+    final scheme = ColorScheme.dark(
+      primary: WarmNight.accentBlue,
+      secondary: WarmNight.accentGreen,
+      tertiary: WarmNight.accentPurple,
+      surface: WarmNight.surface,
+      error: WarmNight.accentRed,
+      onPrimary: WarmNight.background,
+      onSecondary: WarmNight.background,
+      onSurface: WarmNight.textPrimary,
+      onError: WarmNight.textPrimary,
+      outline: WarmNight.border,
+    );
+    return _build(scheme, WarmNight.background, WarmNight.surfaceElevated,
+        WarmNight.textPrimary, WarmNight.textSecondary, WarmNight.border);
+  }
+
+  /// Cool Night: GitHub Dark base with cool indigo accent.
+  static ThemeData coolNight() {
+    final scheme = ColorScheme.dark(
+      primary: CoolNight.accentBlue,
+      secondary: CoolNight.accentGreen,
+      tertiary: CoolNight.accentPurple,
+      surface: CoolNight.surface,
+      error: CoolNight.accentRed,
+      onPrimary: CoolNight.background,
+      onSecondary: CoolNight.background,
+      onSurface: CoolNight.textPrimary,
+      onError: CoolNight.textPrimary,
+      outline: CoolNight.border,
+    );
+    return _build(scheme, CoolNight.background, CoolNight.surfaceElevated,
+        CoolNight.textPrimary, CoolNight.textSecondary, CoolNight.border);
+  }
+
+  /// Pure Dark: OLED-friendly pure black with maximum contrast.
+  static ThemeData pureDark() {
+    final scheme = ColorScheme.dark(
+      primary: PureDark.accentBlue,
+      secondary: PureDark.accentGreen,
+      tertiary: PureDark.accentPurple,
+      surface: PureDark.surface,
+      error: PureDark.accentRed,
+      onPrimary: PureDark.background,
+      onSecondary: PureDark.background,
+      onSurface: PureDark.textPrimary,
+      onError: PureDark.textPrimary,
+      outline: PureDark.border,
+    );
+    return _build(scheme, PureDark.background, PureDark.surfaceElevated,
+        PureDark.textPrimary, PureDark.textSecondary, PureDark.border);
   }
 
   static ThemeData _build(

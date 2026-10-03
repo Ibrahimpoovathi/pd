@@ -4671,6 +4671,18 @@ class $PomodoroPresetsTable extends PomodoroPresets
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $PomodoroPresetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _totalCyclesMeta = const VerificationMeta(
+    'totalCycles',
+  );
+  @override
+  late final GeneratedColumn<int> totalCycles = GeneratedColumn<int>(
+    'total_cycles',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(4),
+  );
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -4743,6 +4755,7 @@ class $PomodoroPresetsTable extends PomodoroPresets
   );
   @override
   List<GeneratedColumn> get $columns => [
+    totalCycles,
     id,
     name,
     workMinutes,
@@ -4762,6 +4775,15 @@ class $PomodoroPresetsTable extends PomodoroPresets
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('total_cycles')) {
+      context.handle(
+        _totalCyclesMeta,
+        totalCycles.isAcceptableOrUnknown(
+          data['total_cycles']!,
+          _totalCyclesMeta,
+        ),
+      );
+    }
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
@@ -4821,6 +4843,10 @@ class $PomodoroPresetsTable extends PomodoroPresets
   PomodoroPreset map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return PomodoroPreset(
+      totalCycles: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}total_cycles'],
+      )!,
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -4855,6 +4881,7 @@ class $PomodoroPresetsTable extends PomodoroPresets
 }
 
 class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
+  final int totalCycles;
   final int id;
   final String name;
   final int workMinutes;
@@ -4862,6 +4889,7 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
   final int longBreakMinutes;
   final bool isCustom;
   const PomodoroPreset({
+    required this.totalCycles,
     required this.id,
     required this.name,
     required this.workMinutes,
@@ -4872,6 +4900,7 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['total_cycles'] = Variable<int>(totalCycles);
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['work_minutes'] = Variable<int>(workMinutes);
@@ -4883,6 +4912,7 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
 
   PomodoroPresetsCompanion toCompanion(bool nullToAbsent) {
     return PomodoroPresetsCompanion(
+      totalCycles: Value(totalCycles),
       id: Value(id),
       name: Value(name),
       workMinutes: Value(workMinutes),
@@ -4898,6 +4928,7 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PomodoroPreset(
+      totalCycles: serializer.fromJson<int>(json['totalCycles']),
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       workMinutes: serializer.fromJson<int>(json['workMinutes']),
@@ -4910,6 +4941,7 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'totalCycles': serializer.toJson<int>(totalCycles),
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'workMinutes': serializer.toJson<int>(workMinutes),
@@ -4920,6 +4952,7 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
   }
 
   PomodoroPreset copyWith({
+    int? totalCycles,
     int? id,
     String? name,
     int? workMinutes,
@@ -4927,6 +4960,7 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
     int? longBreakMinutes,
     bool? isCustom,
   }) => PomodoroPreset(
+    totalCycles: totalCycles ?? this.totalCycles,
     id: id ?? this.id,
     name: name ?? this.name,
     workMinutes: workMinutes ?? this.workMinutes,
@@ -4936,6 +4970,9 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
   );
   PomodoroPreset copyWithCompanion(PomodoroPresetsCompanion data) {
     return PomodoroPreset(
+      totalCycles: data.totalCycles.present
+          ? data.totalCycles.value
+          : this.totalCycles,
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       workMinutes: data.workMinutes.present
@@ -4954,6 +4991,7 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
   @override
   String toString() {
     return (StringBuffer('PomodoroPreset(')
+          ..write('totalCycles: $totalCycles, ')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('workMinutes: $workMinutes, ')
@@ -4966,6 +5004,7 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
 
   @override
   int get hashCode => Object.hash(
+    totalCycles,
     id,
     name,
     workMinutes,
@@ -4977,6 +5016,7 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is PomodoroPreset &&
+          other.totalCycles == this.totalCycles &&
           other.id == this.id &&
           other.name == this.name &&
           other.workMinutes == this.workMinutes &&
@@ -4986,6 +5026,7 @@ class PomodoroPreset extends DataClass implements Insertable<PomodoroPreset> {
 }
 
 class PomodoroPresetsCompanion extends UpdateCompanion<PomodoroPreset> {
+  final Value<int> totalCycles;
   final Value<int> id;
   final Value<String> name;
   final Value<int> workMinutes;
@@ -4993,6 +5034,7 @@ class PomodoroPresetsCompanion extends UpdateCompanion<PomodoroPreset> {
   final Value<int> longBreakMinutes;
   final Value<bool> isCustom;
   const PomodoroPresetsCompanion({
+    this.totalCycles = const Value.absent(),
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.workMinutes = const Value.absent(),
@@ -5001,6 +5043,7 @@ class PomodoroPresetsCompanion extends UpdateCompanion<PomodoroPreset> {
     this.isCustom = const Value.absent(),
   });
   PomodoroPresetsCompanion.insert({
+    this.totalCycles = const Value.absent(),
     this.id = const Value.absent(),
     required String name,
     required int workMinutes,
@@ -5012,6 +5055,7 @@ class PomodoroPresetsCompanion extends UpdateCompanion<PomodoroPreset> {
        shortBreakMinutes = Value(shortBreakMinutes),
        longBreakMinutes = Value(longBreakMinutes);
   static Insertable<PomodoroPreset> custom({
+    Expression<int>? totalCycles,
     Expression<int>? id,
     Expression<String>? name,
     Expression<int>? workMinutes,
@@ -5020,6 +5064,7 @@ class PomodoroPresetsCompanion extends UpdateCompanion<PomodoroPreset> {
     Expression<bool>? isCustom,
   }) {
     return RawValuesInsertable({
+      if (totalCycles != null) 'total_cycles': totalCycles,
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (workMinutes != null) 'work_minutes': workMinutes,
@@ -5030,6 +5075,7 @@ class PomodoroPresetsCompanion extends UpdateCompanion<PomodoroPreset> {
   }
 
   PomodoroPresetsCompanion copyWith({
+    Value<int>? totalCycles,
     Value<int>? id,
     Value<String>? name,
     Value<int>? workMinutes,
@@ -5038,6 +5084,7 @@ class PomodoroPresetsCompanion extends UpdateCompanion<PomodoroPreset> {
     Value<bool>? isCustom,
   }) {
     return PomodoroPresetsCompanion(
+      totalCycles: totalCycles ?? this.totalCycles,
       id: id ?? this.id,
       name: name ?? this.name,
       workMinutes: workMinutes ?? this.workMinutes,
@@ -5050,6 +5097,9 @@ class PomodoroPresetsCompanion extends UpdateCompanion<PomodoroPreset> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (totalCycles.present) {
+      map['total_cycles'] = Variable<int>(totalCycles.value);
+    }
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
@@ -5074,6 +5124,7 @@ class PomodoroPresetsCompanion extends UpdateCompanion<PomodoroPreset> {
   @override
   String toString() {
     return (StringBuffer('PomodoroPresetsCompanion(')
+          ..write('totalCycles: $totalCycles, ')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('workMinutes: $workMinutes, ')
@@ -8841,6 +8892,7 @@ typedef $$PomodoroSessionsTableProcessedTableManager =
     >;
 typedef $$PomodoroPresetsTableCreateCompanionBuilder =
     PomodoroPresetsCompanion Function({
+      Value<int> totalCycles,
       Value<int> id,
       required String name,
       required int workMinutes,
@@ -8850,6 +8902,7 @@ typedef $$PomodoroPresetsTableCreateCompanionBuilder =
     });
 typedef $$PomodoroPresetsTableUpdateCompanionBuilder =
     PomodoroPresetsCompanion Function({
+      Value<int> totalCycles,
       Value<int> id,
       Value<String> name,
       Value<int> workMinutes,
@@ -8867,6 +8920,11 @@ class $$PomodoroPresetsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnFilters<int> get totalCycles => $composableBuilder(
+    column: $table.totalCycles,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
@@ -8907,6 +8965,11 @@ class $$PomodoroPresetsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnOrderings<int> get totalCycles => $composableBuilder(
+    column: $table.totalCycles,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
@@ -8947,6 +9010,11 @@ class $$PomodoroPresetsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  GeneratedColumn<int> get totalCycles => $composableBuilder(
+    column: $table.totalCycles,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
@@ -9009,6 +9077,7 @@ class $$PomodoroPresetsTableTableManager
               $$PomodoroPresetsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
+                Value<int> totalCycles = const Value.absent(),
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<int> workMinutes = const Value.absent(),
@@ -9016,6 +9085,7 @@ class $$PomodoroPresetsTableTableManager
                 Value<int> longBreakMinutes = const Value.absent(),
                 Value<bool> isCustom = const Value.absent(),
               }) => PomodoroPresetsCompanion(
+                totalCycles: totalCycles,
                 id: id,
                 name: name,
                 workMinutes: workMinutes,
@@ -9025,6 +9095,7 @@ class $$PomodoroPresetsTableTableManager
               ),
           createCompanionCallback:
               ({
+                Value<int> totalCycles = const Value.absent(),
                 Value<int> id = const Value.absent(),
                 required String name,
                 required int workMinutes,
@@ -9032,6 +9103,7 @@ class $$PomodoroPresetsTableTableManager
                 required int longBreakMinutes,
                 Value<bool> isCustom = const Value.absent(),
               }) => PomodoroPresetsCompanion.insert(
+                totalCycles: totalCycles,
                 id: id,
                 name: name,
                 workMinutes: workMinutes,

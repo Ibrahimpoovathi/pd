@@ -1,6 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pd/core/storage/preferences.dart';
+import 'package:pd/core/theme/app_theme.dart';
+
+/// App theme variants: 3 dark (Stillness-inspired) + Sepia light.
+enum AppThemeVariant { warmNight, coolNight, pureDark, sepiaLight }
+
+/// Controls the app theme variant. Persisted in SharedPreferences.
+final appThemeVariantProvider =
+    NotifierProvider<AppThemeVariantNotifier, AppThemeVariant>(
+  AppThemeVariantNotifier.new,
+);
+
+class AppThemeVariantNotifier extends Notifier<AppThemeVariant> {
+  @override
+  AppThemeVariant build() {
+    final raw = ref.watch(prefsProvider).getString('app_theme_variant');
+    return AppThemeVariant.values.firstWhere(
+      (v) => v.name == raw,
+      orElse: () => AppThemeVariant.warmNight,
+    );
+  }
+
+  Future<void> setVariant(AppThemeVariant variant) async {
+    state = variant;
+    await ref.read(prefsProvider).setString('app_theme_variant', variant.name);
+  }
+}
+
+/// Resolves the [ThemeData] for the current variant.
+ThemeData appThemeFor(AppThemeVariant variant) {
+  switch (variant) {
+    case AppThemeVariant.warmNight:
+      return AppTheme.warmNight();
+    case AppThemeVariant.coolNight:
+      return AppTheme.coolNight();
+    case AppThemeVariant.pureDark:
+      return AppTheme.pureDark();
+    case AppThemeVariant.sepiaLight:
+      return AppTheme.light();
+  }
+}
 
 /// Controls the app [ThemeMode]. Persisted in SharedPreferences.
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
