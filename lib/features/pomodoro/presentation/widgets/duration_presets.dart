@@ -5,6 +5,7 @@ import 'package:pd/features/pomodoro/presentation/providers/pomodoro_providers.d
 
 /// Inline duration presets (Stillness-inspired).
 /// Only visible in Focus phase when not running.
+/// Colors follow the app [ThemeData].
 class DurationPresetsRow extends ConsumerWidget {
   const DurationPresetsRow({super.key});
 
@@ -63,7 +64,8 @@ class _PresetChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const ember = Color(0xFFE07A5F);
+    final scheme = Theme.of(context).colorScheme;
+    final onSurface = scheme.onSurface;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -71,12 +73,12 @@ class _PresetChip extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: active
-              ? ember.withValues(alpha: 0.16)
-              : Colors.white.withValues(alpha: 0.05),
+              ? scheme.primary.withValues(alpha: 0.16)
+              : onSurface.withValues(alpha: 0.05),
           border: Border.all(
             color: active
-                ? ember.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.07),
+                ? scheme.primary.withValues(alpha: 0.3)
+                : onSurface.withValues(alpha: 0.07),
           ),
         ),
         child: Column(
@@ -84,7 +86,7 @@ class _PresetChip extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: active ? Colors.white : Colors.white.withValues(alpha: 0.7),
+                color: active ? onSurface : onSurface.withValues(alpha: 0.7),
                 fontSize: 10,
                 letterSpacing: 0.8,
               ),
@@ -92,7 +94,9 @@ class _PresetChip extends StatelessWidget {
             Text(
               '${minutes}m',
               style: TextStyle(
-                color: active ? ember : Colors.white.withValues(alpha: 0.6),
+                color: active
+                    ? scheme.primary
+                    : onSurface.withValues(alpha: 0.6),
                 fontSize: 9,
               ),
             ),

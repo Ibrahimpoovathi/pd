@@ -14,6 +14,12 @@ import 'package:pd/features/water/presentation/screens/water_home_screen.dart';
 /// a placeholder until their implementation phase lands.
 final router = GoRouter(
   initialLocation: '/',
+  // P2 fix: unknown deep-links previously rendered a blank page in
+  // release mode. Route them home with a friendly message instead.
+  errorBuilder: (context, state) => const PlaceholderScreen(
+    title: 'Not found',
+    message: 'That page does not exist. Use Home to navigate.',
+  ),
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>

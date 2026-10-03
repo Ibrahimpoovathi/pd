@@ -9,8 +9,6 @@ final prefsProvider = Provider<SharedPreferences>(
 
 /// SharedPreferences keys used across the app.
 abstract final class PrefKeys {
-  static const themeMode = 'theme_mode';
-
   // Module toggles. Prayer tracker is OFF by default, the rest are ON.
   static const modulePrayer = 'module_prayer_enabled';
   static const moduleWater = 'module_water_enabled';

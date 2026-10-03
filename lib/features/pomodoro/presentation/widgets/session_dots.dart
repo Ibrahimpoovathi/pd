@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// Session dots showing focus streak progress toward long break
-/// (Stillness-inspired).
+/// (Stillness-inspired). Colors follow the app [ThemeData] so both
+/// GitHub Dark and Sepia Light render correctly.
 class SessionDots extends StatelessWidget {
   final int streak;
   final int total;
@@ -10,6 +11,7 @@ class SessionDots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final filled = total > 0 ? streak % total : 0;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -22,8 +24,8 @@ class SessionDots extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: i < filled
-                  ? const Color(0xFFE07A5F).withValues(alpha: 0.9)
-                  : Colors.white.withValues(alpha: 0.14),
+                  ? scheme.primary.withValues(alpha: 0.9)
+                  : scheme.onSurface.withValues(alpha: 0.14),
             ),
           ),
         if (streak > 0)
@@ -32,7 +34,7 @@ class SessionDots extends StatelessWidget {
             child: Text(
               '$streak',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.4),
+                color: scheme.onSurface.withValues(alpha: 0.4),
                 fontSize: 10,
               ),
             ),

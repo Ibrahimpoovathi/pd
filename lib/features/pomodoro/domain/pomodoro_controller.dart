@@ -113,6 +113,16 @@ class PomodoroController {
   PomodoroState _state;
   final StreamController<PomodoroState> _stateController =
       StreamController<PomodoroState>.broadcast();
+  bool _closed = false;
+
+  /// P1 fix: safe emit that never throws after [dispose] (fast exit from
+  /// /pomodoro while fire-and-forget `_loadSettings()` is still pending).
+  void _safeAdd(PomodoroState state) {
+    if (_closed || _stateController.isClosed) return;
+    try {
+      _stateController.add(state);
+    } catch (_) {}
+  }
 
   /// Stream of state updates.
   Stream<PomodoroState> get stateStream => _stateController.stream;
@@ -182,9 +192,12 @@ class PomodoroController {
           .difference(_state.phaseStartTime!)
           .inMilliseconds;
       final total = _phaseDuration(_state.phase) * 1000;
+      // P0 fix: guard against zero/negative durations (corrupt prefs)
+      // — clamp(0, total) throws when total <= 0.
+      if (total <= 0) return 0;
       return (total - elapsed).clamp(0, total);
     }
-    return _state.remainingSeconds * 1000;
+    return (_state.remainingSeconds * 1000).clamp(0, 1 << 31);
   }
 
   /// Live progress 0..1 computed from wall-clock.
@@ -241,7 +254,7 @@ class PomodoroController {
       totalCycles: totalCycles,
       remainingSeconds: workMinutes * 60,
     );
-    _stateController.add(_state);
+    _safeAdd(_state);
   }
 
   Future<void> _saveSettings() async {
@@ -269,7 +282,7 @@ class PomodoroController {
       isRunning: true,
       phaseStartTime: now.subtract(Duration(seconds: _state.elapsedSeconds)),
     );
-    _stateController.add(_state);
+    _safeAdd(_state);
 
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), _tick);
@@ -281,12 +294,16 @@ class PomodoroController {
     if (!_state.isRunning) return;
     _timer?.cancel();
     _timer = null;
-    final elapsed = DateTime.now().difference(_state.phaseStartTime!).inSeconds;
+    // P1 fix: phaseStartTime can be null (desync after settings reset).
+    final start = _state.phaseStartTime;
+    final elapsed = start == null
+        ? _state.elapsedSeconds
+        : DateTime.now().difference(start).inSeconds;
     _state = _state.copyWith(
       isRunning: false,
       elapsedSeconds: elapsed,
     );
-    _stateController.add(_state);
+    _safeAdd(_state);
     playStartTick();
   }
 
@@ -315,7 +332,7 @@ class PomodoroController {
       remainingSeconds: workMinutes * 60,
       isRunning: false,
     );
-    _stateController.add(_state);
+    _safeAdd(_state);
   }
 
   /// Skip to next phase.
@@ -341,15 +358,19 @@ class PomodoroController {
       remainingSeconds: total,
       isRunning: false,
     );
-    _stateController.add(_state);
+    _safeAdd(_state);
   }
 
   void _tick(Timer timer) {
     if (!_state.isRunning) return;
+    // P1 fix: null phaseStartTime guard (same desync case as pause()).
+    final start = _state.phaseStartTime;
+    if (start == null) return;
 
     final now = DateTime.now();
-    final elapsed = now.difference(_state.phaseStartTime!).inSeconds;
+    final elapsed = now.difference(start).inSeconds;
     final totalDuration = _phaseDuration(_state.phase);
+    if (totalDuration <= 0) return;
     final remaining = (totalDuration - elapsed).clamp(0, totalDuration);
 
     if (remaining <= 0) {
@@ -359,7 +380,7 @@ class PomodoroController {
         elapsedSeconds: elapsed,
         remainingSeconds: remaining,
       );
-      _stateController.add(_state);
+      _safeAdd(_state);
     }
   }
 
@@ -418,7 +439,7 @@ class PomodoroController {
         elapsedSeconds: 0,
         remainingSeconds: 0,
       );
-      _stateController.add(_state);
+      _safeAdd(_state);
       return;
     }
 
@@ -452,7 +473,7 @@ class PomodoroController {
       isRunning: shouldAutoStart,
       phaseStartTime: shouldAutoStart ? DateTime.now() : null,
     );
-    _stateController.add(_state);
+    _safeAdd(_state);
 
     if (previousPhase != nextPhase) {
       _notifyPhaseChange(nextPhase);
@@ -533,7 +554,7 @@ class PomodoroController {
       remainingSeconds: workMinutes * 60,
       isRunning: false,
     );
-    _stateController.add(_state);
+    _safeAdd(_state);
     _saveSettings();
   }
 
@@ -561,7 +582,7 @@ class PomodoroController {
   void updateKeepScreenOnEnabled(bool enabled) {
     keepScreenOnEnabled = enabled;
     _saveSettings();
-    _stateController.add(_state);
+    _safeAdd(_state);
   }
 
   void updateAmbient({AmbientMode? mode, double? volume, double? rainMix}) {
@@ -605,7 +626,10 @@ class PomodoroController {
   void dispose() {
     _timer?.cancel();
     _timer = null;
-    _stateController.close();
+    _closed = true;
+    try {
+      _stateController.close();
+    } catch (_) {}
     _chimePlayer.dispose();
   }
 }

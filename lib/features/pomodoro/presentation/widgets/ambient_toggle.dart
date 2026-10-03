@@ -5,12 +5,14 @@ import 'package:pd/features/pomodoro/presentation/providers/pomodoro_providers.d
 
 /// Compact ambient mode cycler (Stillness-inspired).
 /// Cycles: Off -> Brown -> Rain -> Mix -> Off.
+/// Colors follow the app [ThemeData].
 class AmbientToggleCompact extends ConsumerWidget {
   const AmbientToggleCompact({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.watch(pomodoroControllerProvider);
+    final scheme = Theme.of(context).colorScheme;
     final label = switch (controller.ambientMode) {
       AmbientMode.off => '○',
       AmbientMode.brown => '◉ brown',
@@ -31,12 +33,12 @@ class AmbientToggleCompact extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: Colors.white.withValues(alpha: 0.06),
+          color: scheme.onSurface.withValues(alpha: 0.06),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.5),
+            color: scheme.onSurface.withValues(alpha: 0.5),
             fontSize: 11,
           ),
         ),

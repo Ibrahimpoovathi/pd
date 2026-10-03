@@ -19,11 +19,11 @@ class PomodoroStatsScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           _statCard(context, 'Current Streak', '${streak.value ?? 0} days',
-              Icons.local_fire_department, Colors.orange),
+              Icons.local_fire_department, Theme.of(context).colorScheme.primary),
           _statCard(context, 'Total Focus Time', _formatMinutes(totalFocus.value ?? 0),
-              Icons.timer, Colors.blue),
+              Icons.timer, Theme.of(context).colorScheme.secondary),
           _statCard(context, 'Completed Sessions', '${completedSessions.value ?? 0}',
-              Icons.check_circle, Colors.green),
+              Icons.check_circle, Theme.of(context).colorScheme.tertiary),
           const SizedBox(height: 24),
           _sectionHeader(context, 'Last 30 Days Focus'),
           _FocusSparkline(),
@@ -37,7 +37,6 @@ class PomodoroStatsScreen extends ConsumerWidget {
 
   Widget _statCard(BuildContext context, String title, String value,
       IconData icon, Color color) {
-    final scheme = Theme.of(context).colorScheme;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -141,8 +140,8 @@ class _FocusSparkline extends ConsumerWidget {
         }
         
         if (spots.every((s) => s.y == 0)) {
-          return const Center(
-            child: Text('No focus data yet', style: TextStyle(color: Colors.grey)),
+          return Center(
+            child: Text('No focus data yet', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
           );
         }
         

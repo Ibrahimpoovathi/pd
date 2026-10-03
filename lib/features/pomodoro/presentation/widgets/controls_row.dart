@@ -4,6 +4,7 @@ import 'package:pd/features/pomodoro/data/pomodoro_haptics.dart';
 import 'package:pd/features/pomodoro/presentation/providers/pomodoro_providers.dart';
 
 /// Timer controls: reset / play-pause / skip (Stillness-inspired).
+/// Colors follow the app [ThemeData].
 class ControlsRow extends ConsumerWidget {
   const ControlsRow({super.key});
 
@@ -61,6 +62,7 @@ class _RoundButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -68,15 +70,15 @@ class _RoundButton extends StatelessWidget {
         height: 44,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.04),
+          color: onSurface.withValues(alpha: 0.04),
         ),
         alignment: Alignment.center,
         child: Text(
           glyph,
           style: TextStyle(
             color: dimmed
-                ? Colors.white.withValues(alpha: 0.25)
-                : Colors.white.withValues(alpha: 0.65),
+                ? onSurface.withValues(alpha: 0.25)
+                : onSurface.withValues(alpha: 0.65),
             fontSize: 18,
           ),
         ),
@@ -93,6 +95,7 @@ class _PlayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -100,8 +103,9 @@ class _PlayButton extends StatelessWidget {
         height: 64,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.06),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+          color: scheme.onSurface.withValues(alpha: 0.06),
+          border:
+              Border.all(color: scheme.onSurface.withValues(alpha: 0.15)),
         ),
         alignment: Alignment.center,
         child: isRunning
@@ -112,7 +116,7 @@ class _PlayButton extends StatelessWidget {
                     width: 3,
                     height: 16,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: scheme.onSurface,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -121,13 +125,14 @@ class _PlayButton extends StatelessWidget {
                     width: 3,
                     height: 16,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: scheme.onSurface,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ],
               )
-            : const Text('▶', style: TextStyle(color: Colors.white, fontSize: 14)),
+            : Text('▶',
+                style: TextStyle(color: scheme.onSurface, fontSize: 14)),
       ),
     );
   }

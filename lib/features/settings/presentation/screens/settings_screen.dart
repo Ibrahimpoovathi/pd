@@ -37,8 +37,7 @@ class SettingsScreen extends ConsumerWidget {
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Text(
-              'Warm/Cool/Pure = Stillness-inspired dark themes. '
-              'Sepia = warm light theme, easy on the eyes.',
+              'Dark = GitHub Dark. Sepia = warm light theme, easy on the eyes.',
             ),
           ),
           _sectionHeader(context, 'Modules'),
@@ -109,12 +108,8 @@ class SettingsScreen extends ConsumerWidget {
 
   String _variantLabel(AppThemeVariant v) {
     switch (v) {
-      case AppThemeVariant.warmNight:
-        return 'Warm';
-      case AppThemeVariant.coolNight:
-        return 'Cool';
-      case AppThemeVariant.pureDark:
-        return 'Pure';
+      case AppThemeVariant.dark:
+        return 'Dark';
       case AppThemeVariant.sepiaLight:
         return 'Sepia';
     }

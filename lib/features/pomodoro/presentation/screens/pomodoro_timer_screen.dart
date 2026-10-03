@@ -73,13 +73,19 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
     _ticker.dispose();
     _revealTimer?.cancel();
     _peekTimer?.cancel();
-    WakelockPlus.disable();
+    // P0 fix: WakelockPlus may throw (missing plugin/platform).
+    // Never let dispose-time platform calls crash the app.
+    try {
+      WakelockPlus.disable();
+    } catch (_) {}
     // Stop ambient when leaving the timer screen.
     try {
       ref.read(pomodoroAmbientEngineProvider).stop();
     } catch (_) {}
     super.dispose();
   }
+
+  bool _lastWakelockState = false;
 
   void _syncTicker(PomodoroController controller) {
     final running = controller.currentState.isRunning;
@@ -89,10 +95,20 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
       _ticker.stop();
     }
     // Keep-screen-on management.
-    if (controller.keepScreenOn) {
-      WakelockPlus.enable();
-    } else {
-      WakelockPlus.disable();
+    // P0 fix: only call the platform when the desired state changes,
+    // fire-and-forget with error swallow — never throw during build().
+    final wantWakelock = controller.keepScreenOn;
+    if (wantWakelock != _lastWakelockState) {
+      _lastWakelockState = wantWakelock;
+      Future(() async {
+        try {
+          if (wantWakelock) {
+            await WakelockPlus.enable();
+          } else {
+            await WakelockPlus.disable();
+          }
+        } catch (_) {}
+      });
     }
   }
 
@@ -187,8 +203,8 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
     // ignore: unused_local_variable (keeps ticker alive)
     final _ = _frameTick;
 
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0B09),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -264,7 +280,7 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
             ],
           ),
           const SizedBox(height: 6),
-          _phaseLabel(state.phase),
+          _phaseLabel(context, state.phase),
           const SizedBox(height: 12),
           // Orb + time
           _orbWithOverlays(
@@ -273,7 +289,7 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
           Text(
             'tap to peek · hold for the cycle',
             style: TextStyle(
-              color: Colors.white.withValues(
+              color: Theme.of(context).colorScheme.onSurface.withValues(
                   alpha: (_revealed || _peeking) ? 0 : 0.25),
               fontSize: 9,
               letterSpacing: 2.2,
@@ -314,7 +330,7 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _phaseLabel(state.phase),
+              _phaseLabel(context, state.phase),
               const SizedBox(height: 10),
               _orbWithOverlays(
                 context, controller, state, liveMs, liveProgress, palette, 220,
@@ -322,7 +338,7 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
               Text(
                 'tap to peek · hold for the cycle',
                 style: TextStyle(
-                  color: Colors.white.withValues(
+                  color: Theme.of(context).colorScheme.onSurface.withValues(
                       alpha: (_revealed || _peeking) ? 0 : 0.25),
                   fontSize: 9,
                   letterSpacing: 2.2,
@@ -398,8 +414,8 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
             children: [
               Text(
                 _formatMs(liveMs),
-                style: const TextStyle(
-                  color: Color(0xFFEDE8E1),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 32,
                   letterSpacing: 1.2,
                   fontWeight: FontWeight.w300,
@@ -412,7 +428,7 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0x33000000),
+              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -421,7 +437,7 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
                 Text(
                   'Session ${state.currentCycle} of ${state.totalCycles}',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                     fontSize: 11,
                     letterSpacing: 0.8,
                   ),
@@ -429,7 +445,7 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
                 Text(
                   'UP NEXT: ${state.phase == PomodoroPhase.work ? 'break' : 'focus'}',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.45),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
                     fontSize: 9,
                     letterSpacing: 1.2,
                   ),
@@ -441,7 +457,7 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
     );
   }
 
-  Widget _phaseLabel(PomodoroPhase phase) {
+  Widget _phaseLabel(BuildContext context, PomodoroPhase phase) {
     final label = switch (phase) {
       PomodoroPhase.work => 'Focus',
       PomodoroPhase.shortBreak => 'Short break',
@@ -452,7 +468,7 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
     return Text(
       label,
       style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.85),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.85),
         fontSize: 13,
         letterSpacing: 2.8,
         fontWeight: FontWeight.w300,
@@ -474,7 +490,7 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
           child: Text(
             wakeLabel,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: 10,
               letterSpacing: 0.6,
             ),
@@ -483,7 +499,7 @@ class _PomodoroTimerScreenState extends ConsumerState<PomodoroTimerScreen>
         Text(
           'Cycle ${state.currentCycle} of ${state.totalCycles}',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.45),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
             fontSize: 10,
             letterSpacing: 0.8,
           ),
@@ -516,8 +532,8 @@ class _TaskBarInlineState extends ConsumerState<_TaskBarInline> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: Colors.white.withValues(alpha: 0.04),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04),
+          border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -527,8 +543,8 @@ class _TaskBarInlineState extends ConsumerState<_TaskBarInline> {
                 display ?? 'What are you focusing on?',
                 style: TextStyle(
                   color: display != null
-                      ? Colors.white.withValues(alpha: 0.85)
-                      : Colors.white.withValues(alpha: 0.5),
+                      ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.85)
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                   fontSize: 13,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -542,7 +558,7 @@ class _TaskBarInlineState extends ConsumerState<_TaskBarInline> {
                   padding: const EdgeInsets.all(4),
                   child: Text('✕',
                       style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5))),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
                 ),
               ),
           ],
@@ -554,7 +570,7 @@ class _TaskBarInlineState extends ConsumerState<_TaskBarInline> {
   Future<void> _showPicker(BuildContext context) async {
     final result = await showModalBottomSheet<_PickedTask>(
       context: context,
-      backgroundColor: const Color(0xFF141414),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -606,10 +622,10 @@ class _TodoPickerSheetState extends ConsumerState<_TodoPickerSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
+            Center(
               child: Text('Pick a focus task',
                   style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       fontWeight: FontWeight.w600)),
             ),
@@ -619,14 +635,14 @@ class _TodoPickerSheetState extends ConsumerState<_TodoPickerSheet> {
                 Expanded(
                   child: TextField(
                     controller: _draft,
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 13),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface, fontSize: 13),
                     decoration: InputDecoration(
                       hintText: 'Or type a custom label…',
                       hintStyle: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.4)),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.06),
+                      fillColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -644,10 +660,10 @@ class _TodoPickerSheetState extends ConsumerState<_TodoPickerSheet> {
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.08),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
                     ),
-                    child: const Text('✓',
-                        style: TextStyle(color: Color(0xFFE07A5F))),
+                    child: Text('✓',
+                        style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                   ),
                 ),
               ],
@@ -659,13 +675,13 @@ class _TodoPickerSheetState extends ConsumerState<_TodoPickerSheet> {
                       padding: EdgeInsets.all(16),
                       child: CircularProgressIndicator())),
               error: (e, _) => Text('Error: $e',
-                  style: const TextStyle(color: Colors.white70)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))),
               data: (todos) {
                 if (todos.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     child: Text('No open tasks — type a label above.',
-                        style: TextStyle(color: Colors.white54)),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54))),
                   );
                 }
                 return Flexible(
@@ -676,19 +692,19 @@ class _TodoPickerSheetState extends ConsumerState<_TodoPickerSheet> {
                       final t = todos[i];
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.checklist_outlined,
-                            color: Colors.white54, size: 20),
+                        leading: Icon(Icons.checklist_outlined,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), size: 20),
                         title: Text(t.title,
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 13),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface, fontSize: 13),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis),
                         subtitle: t.dueDate == null
                             ? null
                             : Text(
                                 'Due ${_formatDue(t.dueDate!)}',
-                                style: const TextStyle(
-                                    color: Colors.white38, fontSize: 11),
+                                style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 11),
                               ),
                         onTap: () => Navigator.pop(
                             context,
@@ -768,7 +784,7 @@ class _IntentionInlineState extends State<_IntentionInline> {
           child: Text(
             'why this focus? tap to set',
             style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.35), fontSize: 12),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35), fontSize: 12),
           ),
         ),
       );
@@ -781,7 +797,7 @@ class _IntentionInlineState extends State<_IntentionInline> {
           children: [
             Text('Intention: $current',
                 style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                     fontSize: 12)),
             GestureDetector(
               onTap: () => setState(() => _editing = true),
@@ -789,7 +805,7 @@ class _IntentionInlineState extends State<_IntentionInline> {
                 padding: const EdgeInsets.all(4),
                 child: Text('✎',
                     style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.4))),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4))),
               ),
             ),
           ],
@@ -807,13 +823,13 @@ class _IntentionInlineState extends State<_IntentionInline> {
                 maxLength: 24,
                 maxLines: 1,
                 style:
-                    const TextStyle(color: Colors.white, fontSize: 12),
+                    TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 12),
                 decoration: InputDecoration(
                   hintText: 'clarity…',
                   hintStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.4)),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
                   filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.06),
+                  fillColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none,
@@ -832,10 +848,10 @@ class _IntentionInlineState extends State<_IntentionInline> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
                 ),
-                child: const Text('✓',
-                    style: TextStyle(color: Color(0xFFE07A5F))),
+                child: Text('✓',
+                    style: TextStyle(color: Theme.of(context).colorScheme.primary)),
               ),
             ),
           ],
@@ -855,11 +871,11 @@ class _IntentionInlineState extends State<_IntentionInline> {
                       horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Colors.white.withValues(alpha: 0.06),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
                   ),
                   child: Text(w,
                       style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                           fontSize: 10)),
                 ),
               ),

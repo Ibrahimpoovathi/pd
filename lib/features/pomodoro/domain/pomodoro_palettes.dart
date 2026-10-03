@@ -146,6 +146,9 @@ class PomodoroPaletteSets {
 
   static Palette get(PomodoroPhase phase, String? id) {
     final list = all[phase] ?? const [];
+    // P1 fix: never throw on empty/missing lists (corrupt persisted
+    // journey or future enum value) — fall back to a safe default.
+    if (list.isEmpty) return PomodoroPalettes.focusEmber;
     if (id != null) {
       for (final p in list) {
         if (p.id == id) return p;
@@ -161,6 +164,12 @@ class PomodoroPaletteSets {
   /// Linear interpolate lightness/chroma/hue via stops, then approximate
   /// oklch -> sRGB with a muted HSV-like conversion.
   static Color colorForStops(List<ColorStop> stops, double progress) {
+    // P1 fix: empty stops (corrupt data) must not throw inside the painter.
+    if (stops.isEmpty) return const Color(0xFFE07A5F);
+    if (stops.length == 1) {
+      final s = stops.first;
+      return _oklchToRgb(s.l, s.c, s.h);
+    }
     final p = progress.clamp(0.0, 1.0);
     for (var i = 0; i < stops.length - 1; i++) {
       final a = stops[i];

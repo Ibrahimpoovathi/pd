@@ -26,22 +26,37 @@ class AmbientEngine {
 
   Future<void> _ensureInit() async {
     if (_initialized) return;
-    for (final player in [_brown, _rain]) {
-      await player.setReleaseMode(ReleaseMode.loop);
+    // P1 fix: missing/mis-declared assets must not throw out of the
+    // engine — ambient is optional, the timer must keep working.
+    try {
+      for (final player in [_brown, _rain]) {
+        await player.setReleaseMode(ReleaseMode.loop);
+      }
+      await _brown.setSource(AssetSource('tones/brown_noise.wav'));
+      await _rain.setSource(AssetSource('tones/rain_noise.wav'));
+      _initialized = true;
+    } catch (_) {
+      _initialized = false;
+      rethrow;
     }
-    await _brown.setSource(AssetSource('tones/brown_noise.wav'));
-    await _rain.setSource(AssetSource('tones/rain_noise.wav'));
-    _initialized = true;
   }
 
   Future<void> start(AmbientParams params) async {
-    await _ensureInit();
+    // P1 fix: never throw out of the engine (missing assets, platform
+    // issues) — ambient is optional, the timer must keep working.
+    try {
+      await _ensureInit();
+    } catch (_) {
+      return;
+    }
     _params = params;
     if (params.mode == AmbientMode.off) {
       await stop();
       return;
     }
-    await _applyVolumes();
+    try {
+      await _applyVolumes();
+    } catch (_) {}
     // (Re)start both; inaudible one is at volume 0.
     try {
       await _brown.resume();
@@ -63,7 +78,9 @@ class AmbientEngine {
       await start(params);
       return;
     }
-    await _applyVolumes();
+    try {
+      await _applyVolumes();
+    } catch (_) {}
   }
 
   Future<void> _applyVolumes() async {

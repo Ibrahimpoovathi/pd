@@ -413,3 +413,49 @@ auto-start, keep-screen-on, rich settings/stats sheets, 3 theme variants.
 - Foreground-service notification for ambient deferred (ambient pauses when
   leaving timer screen for now).
 
+
+## 2026-10-03 — Phase 5: white-screen hunt + theme simplification (done, verified)
+
+### White-screen fixes (release blanks on uncaught build exceptions)
+- **P0-1 `focus_orb.dart`**: `AnimationController(vsync)..repeat()` with null
+  duration throws on every `/pomodoro` build. Fixed: construct with the
+  correct breathe duration upfront (`_breatheMsFor`), keep `_syncBreatheDuration`
+  for status switches.
+- **P0-2 timer screen**: `WakelockPlus.enable()/disable()` ran synchronously
+  inside `build()` (and unguarded in `dispose()`). Fixed: change-tracked
+  (`_lastWakelockState`), fire-and-forget with try/catch; dispose guarded.
+- **P0-3 controller**: `liveRemainingMs().clamp(0, total)` throws when total
+  is 0/negative (corrupt prefs). Fixed: early `if (total <= 0) return 0`.
+- **P1 hardening**: null-guarded `phaseStartTime!` in `pause()`/`_tick()`;
+  `PomodoroPaletteSets.get()` falls back to Ember on empty lists;
+  `colorForStops()` guards empty/singleton stops; `_safeAdd()` wrapper +
+  `_closed` flag stop add-after-close races from fire-and-forget
+  `_loadSettings()`; `AmbientEngine.start/updateParams/_ensureInit` never
+  throw (ambient optional, timer must survive).
+- **P2 router**: added `errorBuilder` → friendly `PlaceholderScreen` instead
+  of blank on unknown deep-links.
+
+### Theme simplification (user: no need for 4 appearances)
+- Deleted `WarmNight`/`CoolNight`/`PureDark` palettes + `AppTheme.warmNight()/
+  coolNight()/pureDark()`; kept `GithubDark` + `SepiaLight`.
+- `AppThemeVariant` reduced to `{dark, sepiaLight}` (default `dark`,
+  preserves current look); old stored values map to `dark`.
+- Deleted dead `themeModeProvider`/`ThemeModeNotifier` + `PrefKeys.themeMode`;
+  `PdApp` uses single resolved theme.
+- Settings: 2 chips (Dark / Sepia).
+- Pomodoro screens now respect `ThemeData`: timer screen, picker sheet,
+  intention/task widgets, settings sheet, FocusOrb track/highlights,
+  stats avatars/empty-text all use `colorScheme.onSurface/primary/surface`
+  instead of hardcoded white/ember/dark. Deleted dead pomodoro
+  `ThemeVariant` enum (Look section is palettes-only).
+
+### Verification
+- `flutter analyze lib/`: 0 errors.
+- `flutter test`: 50/50 pass.
+- Release APK **79.2MB** (<100MB).
+- Device (`pixel_7`): clean install, first frame 2.7s, zero FATAL.
+  Extensive patterns: all 8 routes incl. bad deep-link (error page, no
+  blank), 40 monkey taps on `/pomodoro` (orb/buttons/sheets), zero
+  Flutter exceptions — only emulator system noise in logcat.
+- Staged `pd-phase5-pomodoro-release.apk` + `pd-latest-release.apk`.
+

@@ -9,11 +9,14 @@ class PdApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final variant = ref.watch(appThemeVariantProvider);
+    final theme = appThemeFor(variant);
     return MaterialApp.router(
       title: 'PD — Personal Development',
       debugShowCheckedModeBanner: false,
-      theme: appThemeFor(variant),
-      darkTheme: appThemeFor(variant),
+      // The variant fully determines brightness (dark = GitHub Dark,
+      // sepiaLight = Sepia Light), so a single theme suffices.
+      theme: theme,
+      darkTheme: theme,
       themeMode: ThemeMode.light,
       routerConfig: router,
     );

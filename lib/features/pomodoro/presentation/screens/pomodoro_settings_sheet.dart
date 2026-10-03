@@ -16,7 +16,7 @@ class PomodoroSettingsSheet extends ConsumerWidget {
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF141414),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -38,20 +38,20 @@ class PomodoroSettingsSheet extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Stillness',
+                Text('Stillness',
                     style: TextStyle(
-                        color: Color(0xFFE07A5F),
+                        color: Theme.of(context).colorScheme.primary,
                         fontSize: 14,
                         letterSpacing: 1.0)),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('done',
-                      style: TextStyle(color: Colors.white54, fontSize: 13)),
+                  child: Text('done',
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 13)),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            _sectionLabel('Durations'),
+            _sectionLabel(context, 'Durations'),
             _StepperRow(
               label: 'Focus',
               value: controller.workMinutes,
@@ -122,7 +122,7 @@ class PomodoroSettingsSheet extends ConsumerWidget {
               },
             ),
             const SizedBox(height: 12),
-            _sectionLabel('Flow'),
+            _sectionLabel(context, 'Flow'),
             _ToggleRow(
               title: 'Auto-start breaks',
               subtitle: 'Start the break after focus completes',
@@ -136,7 +136,7 @@ class PomodoroSettingsSheet extends ConsumerWidget {
               onChange: (v) => controller.updateAutoStart(focus: v),
             ),
             const SizedBox(height: 12),
-            _sectionLabel('Display'),
+            _sectionLabel(context, 'Display'),
             _ToggleRow(
               title: 'Keep screen awake',
               subtitle: 'Prevent sleep while running/paused',
@@ -145,15 +145,15 @@ class PomodoroSettingsSheet extends ConsumerWidget {
                   controller.updateKeepScreenOnEnabled(v),
             ),
             const SizedBox(height: 12),
-            _sectionLabel('Atmosphere'),
+            _sectionLabel(context, 'Atmosphere'),
             _AmbientRow(controller: controller),
-            _sectionLabel('Chime'),
+            _sectionLabel(context, 'Chime'),
             _ChimeRow(controller: controller),
             const SizedBox(height: 12),
-            _sectionLabel('Look'),
+            _sectionLabel(context, 'Look'),
             _PaletteRows(controller: controller),
             const SizedBox(height: 12),
-            _sectionLabel('Other'),
+            _sectionLabel(context, 'Other'),
             _ToggleRow(
               title: 'Sound chime',
               subtitle: 'Play alarm tone on session end',
@@ -167,10 +167,10 @@ class PomodoroSettingsSheet extends ConsumerWidget {
               onChange: (v) => controller.updateVibrationEnabled(v),
             ),
             const SizedBox(height: 18),
-            const Text(
+            Text(
               'Tip: Tap time to reveal. Hold orb to peek cycle. '
               'Tap footer wake label to toggle keep-awake.',
-              style: TextStyle(color: Colors.white38, fontSize: 11),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 11),
             ),
           ],
         ),
@@ -178,13 +178,13 @@ class PomodoroSettingsSheet extends ConsumerWidget {
     );
   }
 
-  Widget _sectionLabel(String text) {
+  Widget _sectionLabel(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(top: 10, bottom: 6),
       child: Text(
         text.toUpperCase(),
         style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.32),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.32),
           fontSize: 10,
           letterSpacing: 2.2,
         ),
@@ -219,7 +219,7 @@ class _StepperRow extends StatelessWidget {
         children: [
           Text(label,
               style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.82),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.82),
                   fontSize: 13)),
           Row(
             children: [
@@ -230,8 +230,8 @@ class _StepperRow extends StatelessWidget {
                 width: 72,
                 child: Text('$value $suffix',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 13)),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface, fontSize: 13)),
               ),
               _StepButton(
                   glyph: '+',
@@ -259,12 +259,12 @@ class _StepButton extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border:
-              Border.all(color: Colors.white.withValues(alpha: 0.15)),
+              Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15)),
         ),
         alignment: Alignment.center,
         child: Text(glyph,
             style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6))),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
       ),
     );
   }
@@ -295,11 +295,11 @@ class _ToggleRow extends StatelessWidget {
               children: [
                 Text(title,
                     style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.82),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.82),
                         fontSize: 13)),
                 Text(subtitle,
                     style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.48),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.48),
                         fontSize: 11)),
               ],
             ),
@@ -307,9 +307,9 @@ class _ToggleRow extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChange,
-            activeThumbColor: const Color(0xFFE07A5F),
+            activeThumbColor: Theme.of(context).colorScheme.primary,
             activeTrackColor:
-                const Color(0xFFE07A5F).withValues(alpha: 0.3),
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
           ),
         ],
       ),
@@ -327,15 +327,15 @@ class _AmbientRow extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Ambient bed',
+        Text('Ambient bed',
             style: TextStyle(
-                color: Colors.white, fontSize: 13)),
+                color: Theme.of(context).colorScheme.onSurface, fontSize: 13)),
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            color: Colors.white.withValues(alpha: 0.04),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04),
           ),
           child: Row(
             children: [
@@ -354,7 +354,7 @@ class _AmbientRow extends ConsumerWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: controller.ambientMode == entry.$1
-                            ? const Color(0xFFE07A5F)
+                            ? Theme.of(context).colorScheme.primary
                                 .withValues(alpha: 0.16)
                             : Colors.transparent,
                       ),
@@ -363,8 +363,8 @@ class _AmbientRow extends ConsumerWidget {
                         entry.$2.toUpperCase(),
                         style: TextStyle(
                           color: controller.ambientMode == entry.$1
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.55),
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
                           fontSize: 9,
                           letterSpacing: 0.8,
                         ),
@@ -380,21 +380,21 @@ class _AmbientRow extends ConsumerWidget {
             children: [
               Text('quiet',
                   style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.4),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                       fontSize: 9)),
               Expanded(
                 child: Slider(
                   value: controller.ambientVolume,
                   onChanged: (v) =>
                       controller.updateAmbient(volume: v),
-                  activeColor: const Color(0xFFE07A5F),
+                  activeColor: Theme.of(context).colorScheme.primary,
                   inactiveColor:
-                      Colors.white.withValues(alpha: 0.15),
+                      Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
                 ),
               ),
               Text('full',
                   style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.4),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                       fontSize: 9)),
             ],
           ),
@@ -406,7 +406,7 @@ class _AmbientRow extends ConsumerWidget {
               AmbientMode.off => '',
             },
             style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.45),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
                 fontSize: 10),
           ),
         ],
@@ -417,7 +417,7 @@ class _AmbientRow extends ConsumerWidget {
                 width: 36,
                 child: Text('brown',
                     style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.4),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                         fontSize: 9)),
               ),
               Expanded(
@@ -425,16 +425,16 @@ class _AmbientRow extends ConsumerWidget {
                   value: controller.ambientRainMix,
                   onChanged: (v) =>
                       controller.updateAmbient(rainMix: v),
-                  activeColor: const Color(0xFFE07A5F),
+                  activeColor: Theme.of(context).colorScheme.primary,
                   inactiveColor:
-                      Colors.white.withValues(alpha: 0.15),
+                      Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
                 ),
               ),
               SizedBox(
                 width: 28,
                 child: Text('rain',
                     style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.4),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                         fontSize: 9)),
               ),
             ],
@@ -453,17 +453,17 @@ class _ChimeRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 10),
+        Padding(
+          padding: const EdgeInsets.only(top: 10),
           child: Text('Chime tone',
-              style: TextStyle(color: Colors.white, fontSize: 13)),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 13)),
         ),
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            color: Colors.white.withValues(alpha: 0.04),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04),
           ),
           child: Row(
             children: [
@@ -485,7 +485,7 @@ class _ChimeRow extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: controller.chimeTone == entry.$1
-                            ? const Color(0xFFE07A5F)
+                            ? Theme.of(context).colorScheme.primary
                                 .withValues(alpha: 0.16)
                             : Colors.transparent,
                       ),
@@ -494,8 +494,8 @@ class _ChimeRow extends StatelessWidget {
                         entry.$2.toUpperCase(),
                         style: TextStyle(
                           color: controller.chimeTone == entry.$1
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.55),
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
                           fontSize: 9,
                         ),
                       ),
@@ -509,7 +509,7 @@ class _ChimeRow extends StatelessWidget {
           padding: const EdgeInsets.only(top: 4),
           child: Text('Alarm stream — tap to preview',
               style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.4),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                   fontSize: 10)),
         ),
       ],
@@ -535,7 +535,7 @@ class _PaletteRows extends StatelessWidget {
             padding: const EdgeInsets.only(top: 10, bottom: 4),
             child: Text(entry.$2,
                 style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                     fontSize: 11)),
           ),
           Row(
@@ -564,11 +564,11 @@ class _PaletteRows extends StatelessWidget {
                           : 32,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: const Color(0xFF2A2A2A),
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         border: controller.colorJourneys[entry.$1] ==
                                 pal.id
                             ? Border.all(
-                                color: const Color(0xFFE07A5F),
+                                color: Theme.of(context).colorScheme.primary,
                                 width: 2)
                             : null,
                       ),

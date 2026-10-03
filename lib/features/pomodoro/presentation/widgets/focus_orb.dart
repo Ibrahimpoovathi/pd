@@ -48,7 +48,12 @@ class _FocusOrbState extends State<FocusOrb> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _breathe = AnimationController(vsync: this)..repeat();
+    // P0 fix: AnimationController.repeat() requires a non-null duration.
+    // Initialize with the correct duration for the current status upfront.
+    _breathe = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: _breatheMs()),
+    )..repeat();
     _driftX = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 60),
@@ -71,10 +76,16 @@ class _FocusOrbState extends State<FocusOrb> with TickerProviderStateMixin {
     }
   }
 
+  static int _breatheMsFor(bool isRunning, PomodoroPhase phase) {
+    if (isRunning) return 12000;
+    if (phase == PomodoroPhase.paused) return 19000;
+    return 26000;
+  }
+
+  int _breatheMs() => _breatheMsFor(widget.isRunning, widget.phase);
+
   void _syncBreatheDuration() {
-    final ms = widget.isRunning
-        ? 12000
-        : (widget.phase == PomodoroPhase.paused ? 19000 : 26000);
+    final ms = _breatheMs();
     if (_breathe.duration?.inMilliseconds != ms) {
       final value = _breathe.value;
       _breathe.duration = Duration(milliseconds: ms);
@@ -128,6 +139,7 @@ class _FocusOrbState extends State<FocusOrb> with TickerProviderStateMixin {
           final driftX = (_driftX.value * 2 - 1) * 6.0;
           final driftY = (_driftY.value * 2 - 1) * 6.0;
 
+          final scheme = Theme.of(context).colorScheme;
           return SizedBox(
             width: widget.size,
             height: widget.size,
@@ -141,6 +153,11 @@ class _FocusOrbState extends State<FocusOrb> with TickerProviderStateMixin {
                 flashVisible: _flashVisible,
                 bodySize: bodySize,
                 ringSize: ringSize,
+                // Theme-derived chrome so the orb reads on light + dark.
+                trackColor:
+                    scheme.onSurface.withValues(alpha: 0.06),
+                highlightColor:
+                    scheme.onSurface.withValues(alpha: 0.12),
               ),
             ),
           );
@@ -160,6 +177,8 @@ class _OrbPainter extends CustomPainter {
   final bool flashVisible;
   final double bodySize;
   final double ringSize;
+  final Color trackColor;
+  final Color highlightColor;
 
   _OrbPainter({
     required this.orbColor,
@@ -170,6 +189,8 @@ class _OrbPainter extends CustomPainter {
     required this.flashVisible,
     required this.bodySize,
     required this.ringSize,
+    required this.trackColor,
+    required this.highlightColor,
   });
 
   @override
@@ -205,7 +226,7 @@ class _OrbPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round
-      ..color = const Color(0x0FFFFFFF);
+      ..color = trackColor;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: ringSize / 2),
       -math.pi / 2,
@@ -255,13 +276,13 @@ class _OrbPainter extends CustomPainter {
     canvas.drawCircle(
       Offset(center.dx - bodyRadius * 0.28, center.dy - bodyRadius * 0.38),
       bodyRadius * 0.16,
-      Paint()..color = Colors.white.withValues(alpha: 0.12),
+      Paint()..color = highlightColor,
     );
     // Rim light (lower-right)
     canvas.drawCircle(
       Offset(center.dx + bodyRadius * 0.18, center.dy + bodyRadius * 0.15),
       bodyRadius * 0.07,
-      Paint()..color = Colors.white.withValues(alpha: 0.08),
+      Paint()..color = highlightColor.withValues(alpha: 0.66),
     );
 
     // Flash ring on phase change
@@ -284,6 +305,8 @@ class _OrbPainter extends CustomPainter {
         oldDelegate.breathe != breathe ||
         oldDelegate.glowPulse != glowPulse ||
         oldDelegate.drift != drift ||
-        oldDelegate.flashVisible != flashVisible;
+        oldDelegate.flashVisible != flashVisible ||
+        oldDelegate.trackColor != trackColor ||
+        oldDelegate.highlightColor != highlightColor;
   }
 }

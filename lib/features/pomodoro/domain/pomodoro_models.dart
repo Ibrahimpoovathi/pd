@@ -33,9 +33,6 @@ enum AmbientMode { off, brown, rain, mix }
 /// Chime tones for phase transitions.
 enum ChimeTone { warm, glass, wood, bowl }
 
-/// Theme variants for the Pomodoro experience.
-enum ThemeVariant { warmNight, coolNight, pureDark }
-
 /// OKLCH color stop for palette interpolation.
 class ColorStop {
   final double p; // progress 0..1
